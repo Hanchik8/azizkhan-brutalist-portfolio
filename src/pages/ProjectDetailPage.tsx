@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { useParams, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -55,6 +55,10 @@ function DetailNav() {
 export default function ProjectDetailPage() {
   const { slug } = useParams({ from: '/projects/$slug' })
   const project = projects.find((p) => p.slug === slug)
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [slug])
 
   if (!project) {
     return (

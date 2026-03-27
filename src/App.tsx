@@ -30,6 +30,9 @@ const projectDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/projects/$slug',
   component: ProjectDetailPage,
+  onEnter: () => {
+    window.scrollTo({ top: 0 })
+  },
 })
 
 /* ─── Router ─── */
