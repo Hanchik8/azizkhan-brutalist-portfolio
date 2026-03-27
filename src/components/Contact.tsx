@@ -4,42 +4,23 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
 import { Mail, Phone, ExternalLink, Code2 } from 'lucide-react'
+import { contactLinks as contactLinksData } from '../data/contacts'
+
+const iconMap: Record<string, typeof Mail> = { Mail, Phone, ExternalLink, Code2 }
+
+const contactLinks = contactLinksData.map(link => ({
+  ...link,
+  icon: iconMap[link.icon] || Mail,
+}))
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'Минимум 2 символа'),
-  email: z.string().email('Некорректный email'),
-  subject: z.string().min(3, 'Минимум 3 символа'),
-  message: z.string().min(10, 'Минимум 10 символов'),
+  name: z.string().min(2, 'Minimum 2 characters'),
+  email: z.string().email('Invalid email'),
+  subject: z.string().min(3, 'Minimum 3 characters'),
+  message: z.string().min(10, 'Minimum 10 characters'),
 })
 
 type ContactFormData = z.infer<typeof contactSchema>
-
-const contactLinks = [
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'azizkhan1232281@gmail.com',
-    href: 'mailto:azizkhan1232281@gmail.com',
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '+996 702 800 063',
-    href: 'tel:+996702800063',
-  },
-  {
-    icon: Code2,
-    label: 'GitHub',
-    value: 'github.com/Hanchik8',
-    href: 'https://github.com/Hanchik8',
-  },
-  {
-    icon: ExternalLink,
-    label: 'Portfolio',
-    value: 'azizkhan.dev',
-    href: 'https://azizkhan.dev',
-  },
-]
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -111,7 +92,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="relative py-24 px-6 md:px-12 lg:px-20">
+    <section id="contact" aria-label="Contact Information" className="relative py-24 px-6 md:px-12 lg:px-20">
       {/* Section heading */}
       <motion.div
         initial="hidden"
@@ -144,8 +125,7 @@ export default function Contact() {
             custom={1}
             className="text-muted-foreground text-lg leading-relaxed max-w-md"
           >
-            Открыт к новым проектам и сотрудничеству. Свяжитесь со мной любым
-            удобным способом.
+            Open to new projects and collaboration. Feel free to reach out through any convenient channel.
           </motion.p>
 
           <div className="flex flex-col gap-4">
@@ -189,10 +169,10 @@ export default function Contact() {
             className="flex flex-col gap-6 border-2 border-border bg-card p-6 md:p-8"
           >
             <FormField
-              label="Имя"
+              label="Name"
               error={errors.name?.message}
               {...register('name')}
-              placeholder="Ваше имя"
+              placeholder="Your name"
             />
             <FormField
               label="Email"
@@ -202,16 +182,16 @@ export default function Contact() {
               placeholder="email@example.com"
             />
             <FormField
-              label="Тема"
+              label="Subject"
               error={errors.subject?.message}
               {...register('subject')}
-              placeholder="Тема сообщения"
+              placeholder="Message subject"
             />
             <FormField
-              label="Сообщение"
+              label="Message"
               error={errors.message?.message}
               {...register('message')}
-              placeholder="Расскажите о вашем проекте..."
+              placeholder="Tell me about your project..."
               multiline
             />
 
@@ -220,7 +200,7 @@ export default function Contact() {
               disabled={isSubmitting}
               className="mt-2 w-full border-2 border-primary bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
             >
-              {isSubmitting ? 'Отправка...' : 'Отправить сообщение'}
+              {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
 
             {submitted && (
@@ -229,7 +209,7 @@ export default function Contact() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center font-mono text-sm text-primary"
               >
-                Сообщение отправлено. Спасибо!
+                Message sent. Thank you!
               </motion.p>
             )}
           </motion.form>

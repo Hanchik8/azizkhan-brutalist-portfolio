@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Code2, FolderGit2, Mail } from 'lucide-react'
+import { Home, Code2, FolderGit2, Mail, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Hero', icon: Home },
   { id: 'skills', label: 'Skills', icon: Code2 },
   { id: 'projects', label: 'Projects', icon: FolderGit2 },
+  { id: 'timeline', label: 'Timeline', icon: Clock },
   { id: 'contact', label: 'Contact', icon: Mail },
 ] as const
 
@@ -56,6 +57,7 @@ export default function FloatingNav() {
     <AnimatePresence>
       {isVisible && (
         <motion.nav
+          aria-label="Section navigation"
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
@@ -75,6 +77,8 @@ export default function FloatingNav() {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
+                aria-label={item.label}
+                aria-current={isActive ? 'true' : undefined}
                 className={cn(
                   'group relative flex items-center gap-2 rounded-full px-4 py-2.5',
                   'font-mono text-xs uppercase tracking-wider',
