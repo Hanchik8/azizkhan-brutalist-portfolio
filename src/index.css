@@ -166,6 +166,20 @@
   }
 }
 
+/* ── JSON Syntax Highlighting ── */
+.json-key {
+  color: hsl(72 90% 62%);
+}
+.json-string {
+  color: hsl(30 80% 65%);
+}
+.json-number {
+  color: hsl(200 80% 55%);
+}
+.json-bool {
+  color: hsl(0 72% 51%);
+}
+
 /* ── React Flow Brutalist Overrides ── */
 .architecture-flow .react-flow__pane {
   cursor: grab;
