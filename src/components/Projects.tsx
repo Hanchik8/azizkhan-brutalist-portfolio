@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, ArrowRight } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { projects } from '../data/projects'
 import type { Project } from '../types'
 
@@ -67,19 +68,31 @@ function ProjectCard({
             {project.description}
           </p>
 
-          {project.github && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-primary transition-colors duration-200 group/link w-fit focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
-            >
-              <span className="border-b border-current pb-0.5 group-hover/link:border-primary">
-                View on GitHub
-              </span>
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          )}
+          <div className="flex flex-wrap items-center gap-4">
+            {project.hasDetail && (
+              <Link
+                to="/projects/$slug"
+                params={{ slug: project.slug }}
+                className="inline-flex items-center gap-2 text-sm font-mono text-primary-foreground bg-primary hover:bg-primary/90 px-4 py-2 transition-all duration-200 group/detail active:scale-95"
+              >
+                <span className="uppercase tracking-wider text-xs font-bold">System Design</span>
+                <ArrowRight className="h-3.5 w-3.5 group-hover/detail:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
+            {project.github && (
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-primary transition-colors duration-200 group/link w-fit focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+              >
+                <span className="border-b border-current pb-0.5 group-hover/link:border-primary">
+                  View on GitHub
+                </span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
         </div>
 
         <div className="absolute bottom-0 right-0 w-12 h-12 border-t border-l border-border/50 group-hover:border-primary/30 transition-colors duration-300" />

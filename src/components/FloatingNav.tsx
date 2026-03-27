@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Code2, FolderGit2, Mail, Clock, Network, Activity, Terminal, FileText } from 'lucide-react'
+import { Home, Code2, FolderGit2, Mail, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -8,10 +8,6 @@ const NAV_ITEMS = [
   { id: 'skills', label: 'Skills', icon: Code2 },
   { id: 'projects', label: 'Projects', icon: FolderGit2 },
   { id: 'timeline', label: 'Timeline', icon: Clock },
-  { id: 'architecture', label: 'Arch', icon: Network },
-  { id: 'server-status', label: 'Status', icon: Activity },
-  { id: 'api-playground', label: 'API', icon: Terminal },
-  { id: 'adr', label: 'ADR', icon: FileText },
   { id: 'contact', label: 'Contact', icon: Mail },
 ] as const
 

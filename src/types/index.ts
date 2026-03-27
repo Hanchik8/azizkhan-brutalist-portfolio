@@ -1,10 +1,12 @@
 export interface Project {
   number: string
   title: string
+  slug: string
   subtitle: string
   tech: string[]
   description: string
   github: string | null
+  hasDetail?: boolean
 }
 
 export interface Skill {

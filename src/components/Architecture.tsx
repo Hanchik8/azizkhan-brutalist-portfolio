@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -75,6 +75,14 @@ export default function Architecture() {
   const [nodes, , onNodesChange] = useNodesState(architectureNodes)
   const [edges, , onEdgesChange] = useEdgesState(architectureEdges)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check, { passive: true })
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const defaultViewport = useMemo(() => ({ x: 20, y: 20, zoom: 0.78 }), [])
 
@@ -159,11 +167,13 @@ export default function Architecture() {
             minZoom={0.3}
             maxZoom={2}
             proOptions={{ hideAttribution: true }}
-            nodesDraggable={true}
+            nodesDraggable={!isMobile}
             nodesConnectable={false}
-            elementsSelectable={true}
-            panOnDrag={true}
-            zoomOnScroll={true}
+            elementsSelectable={!isMobile}
+            panOnDrag={!isMobile}
+            zoomOnScroll={!isMobile}
+            zoomOnPinch={!isMobile}
+            preventScrolling={!isMobile}
             className="architecture-flow"
           >
             <Background
