@@ -165,3 +165,58 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── React Flow Brutalist Overrides ── */
+.architecture-flow .react-flow__pane {
+  cursor: grab;
+}
+.architecture-flow .react-flow__pane:active {
+  cursor: grabbing;
+}
+.architecture-flow .react-flow__node {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.architecture-flow .react-flow__node:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Controls */
+.architecture-controls {
+  border: 2px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: hsl(0 0% 5%) !important;
+}
+.architecture-controls button {
+  border: none !important;
+  border-bottom: 1px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+  background: hsl(0 0% 7%) !important;
+  fill: hsl(0 0% 45%) !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+.architecture-controls button:hover {
+  background: hsl(0 0% 12%) !important;
+  fill: hsl(72 90% 62%) !important;
+}
+.architecture-controls button:last-child {
+  border-bottom: none !important;
+}
+
+/* Minimap */
+.architecture-minimap {
+  border: 2px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+}
+
+/* Edge animation keyframes */
+@keyframes flowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+.architecture-flow .react-flow__edge-path {
+  animation: flowPulse 3s ease-in-out infinite;
+}
