@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, forwardRef, type InputHTMLAttributes } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -50,6 +50,48 @@ const fadeUp = {
   }),
 }
 
+/* ── Reusable brutalist form field ── */
+interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+  label: string
+  error?: string
+  multiline?: boolean
+}
+
+const FormField = forwardRef<HTMLInputElement | HTMLTextAreaElement, FormFieldProps>(
+  ({ label, error, multiline, ...props }, ref) => {
+    const baseClasses =
+      'w-full border-2 border-border bg-secondary px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:border-primary focus:outline-none'
+
+    return (
+      <div className="flex flex-col gap-1.5">
+        <label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          {label}
+        </label>
+        {multiline ? (
+          <textarea
+            ref={ref as React.Ref<HTMLTextAreaElement>}
+            rows={5}
+            className={`${baseClasses} resize-none`}
+            {...(props as InputHTMLAttributes<HTMLTextAreaElement>)}
+          />
+        ) : (
+          <input
+            ref={ref as React.Ref<HTMLInputElement>}
+            className={baseClasses}
+            {...(props as InputHTMLAttributes<HTMLInputElement>)}
+          />
+        )}
+        {error && (
+          <p className="font-mono text-xs text-destructive">{error}</p>
+        )}
+      </div>
+    )
+  }
+)
+
+FormField.displayName = 'FormField'
+
+/* ── Contact Section ── */
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false)
 
@@ -62,7 +104,7 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   })
 
-  const onSubmit = (data: ContactFormData) => {
+  const onSubmit = (_data: ContactFormData) => {
     setSubmitted(true)
     reset()
     setTimeout(() => setSubmitted(false), 4000)
@@ -80,7 +122,7 @@ export default function Contact() {
         className="mb-16"
       >
         <p className="font-mono text-sm tracking-widest text-primary uppercase mb-3">
-          // contact
+          {'// contact'}
         </p>
         <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-foreground">
           GET IN TOUCH
@@ -187,7 +229,7 @@ export default function Contact() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center font-mono text-sm text-primary"
               >
-                ✓ Сообщение отправлено. Спасибо!
+                Сообщение отправлено. Спасибо!
               </motion.p>
             )}
           </motion.form>
@@ -196,47 +238,3 @@ export default function Contact() {
     </section>
   )
 }
-
-/* ── Reusable brutalist form field ── */
-
-import { forwardRef, type InputHTMLAttributes } from 'react'
-
-interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
-  label: string
-  error?: string
-  multiline?: boolean
-}
-
-const FormField = forwardRef<HTMLInputElement | HTMLTextAreaElement, FormFieldProps>(
-  ({ label, error, multiline, className, ...props }, ref) => {
-    const baseClasses =
-      'w-full border-2 border-border bg-secondary px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:border-primary focus:outline-none'
-
-    return (
-      <div className="flex flex-col gap-1.5">
-        <label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {label}
-        </label>
-        {multiline ? (
-          <textarea
-            ref={ref as React.Ref<HTMLTextAreaElement>}
-            rows={5}
-            className={`${baseClasses} resize-none`}
-            {...(props as InputHTMLAttributes<HTMLTextAreaElement>)}
-          />
-        ) : (
-          <input
-            ref={ref as React.Ref<HTMLInputElement>}
-            className={baseClasses}
-            {...(props as InputHTMLAttributes<HTMLInputElement>)}
-          />
-        )}
-        {error && (
-          <p className="font-mono text-xs text-destructive">{error}</p>
-        )}
-      </div>
-    )
-  }
-)
-
-FormField.displayName = 'FormField'

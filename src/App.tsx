@@ -5,9 +5,9 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import FloatingNav from './components/FloatingNav'
 
-function App() {
+export default function App() {
   return (
-    <div className="noise-bg">
+    <div className="noise-bg bg-background text-foreground">
       <Hero />
       <Skills />
       <Projects />
@@ -17,5 +17,3 @@ function App() {
     </div>
   )
 }
-
-export default App
