@@ -32,19 +32,14 @@ const SERVICES = [
   { name: 'INVENTORY_SERVICE', port: 8084 },
 ] as const
 
-const LOG_LINES = [
-  '[INFO ] c.a.p.order.OrderService       : Saga transaction initiated for order #38291',
-  '[DEBUG] c.a.p.inv.InventoryService     : Stock reserved for SKU-1847',
-  '[INFO ] c.a.p.auth.JwtFilter           : Token validated for user aziz_dev',
-  '[DEBUG] c.a.p.product.ProductCache     : Cache HIT for product catalog v3',
-  '[INFO ] c.a.p.kafka.EventBus           : Published order.created to topic orders.v1',
-  '[DEBUG] c.a.p.redis.SessionStore       : Session refreshed, TTL reset to 3600s',
-  '[INFO ] c.a.p.gateway.RateLimiter      : 142 req/s — within threshold',
-  '[INFO ] c.a.p.order.SagaOrchestrator   : Payment confirmed, shipping dispatched',
-  '[DEBUG] c.a.p.inv.StockWatcher         : Low stock alert for SKU-0092 (qty: 4)',
-  '[INFO ] c.a.p.metrics.PrometheusExport : Scrape completed — 847 series exported',
-  '[DEBUG] c.a.p.auth.OAuth2Handler       : Refresh token rotated for session #7721',
-  '[INFO ] c.a.p.product.SearchIndex      : Reindexed 2,340 products in 1.2s',
+const KAFKA_EVENTS = [
+  '{ "topic": "orders.v1", "type": "OrderCreated", "payload": { "id": 8472, "status": "PENDING" } }',
+  '{ "topic": "inventory.v2", "type": "StockReserved", "payload": { "sku": "PRD-992", "qty": 1 } }',
+  '{ "topic": "payments.v1", "type": "PaymentProcessed", "payload": { "orderId": 8472, "status": "SUCCESS" } }',
+  '{ "topic": "notifications", "type": "EmailSent", "payload": { "userId": 102, "template": "ORDER_CONFIRM" } }',
+  '{ "topic": "orders.v1", "type": "StatusUpdated", "payload": { "id": 8472, "status": "CONFIRMED" } }',
+  '{ "topic": "cart.v1", "type": "CartCleared", "payload": { "userId": 102, "cartId": 441 } }',
+  '{ "topic": "users.v1", "type": "UserLogin", "payload": { "userId": 102, "ip": "192.168.1.42" } }',
 ]
 
 /* ── Fluctuating metric hook ── */
@@ -162,7 +157,7 @@ function TelemetryDashboard() {
   const cacheHit = useFluctuatingMetric(91, 96, 2200)
   const { count: kafkaTopics, ref: kafkaRef } = useScrollCounter(8)
 
-  const repeatedLogs = [...LOG_LINES, ...LOG_LINES]
+  const repeatedEvents = [...KAFKA_EVENTS, ...KAFKA_EVENTS]
 
   return (
     <motion.div
@@ -210,14 +205,14 @@ function TelemetryDashboard() {
         ))}
       </div>
 
-      {/* Log console */}
+      {/* Kafka Message Stream */}
       <div className="relative overflow-hidden border border-border bg-card p-5">
         <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
           <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">
-            [SERVER_LOG // RUNNING]
+            [MESSAGE_BUS // KAFKA]
           </p>
           <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-            spring-boot/runtime
+            cluster: alive
           </span>
         </div>
 
@@ -226,17 +221,22 @@ function TelemetryDashboard() {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-card to-transparent z-10" />
           <motion.div
             animate={{ y: ['0%', '-50%'] }}
-            transition={{ duration: 22, ease: 'linear', repeat: Infinity }}
-            className="space-y-2.5"
+            transition={{ duration: 15, ease: 'linear', repeat: Infinity }}
+            className="space-y-3"
           >
-            {repeatedLogs.map((line, index) => (
-              <p
-                key={`${line}-${index}`}
-                className="font-mono text-[11px] leading-relaxed text-muted-foreground/90 whitespace-nowrap"
-              >
-                {line}
-              </p>
-            ))}
+            {repeatedEvents.map((event, index) => {
+              const coloredEvent = event
+                .replace(/"topic": "([^"]+)"/, '"topic": <span class="text-accent">""</span>')
+                .replace(/"type": "([^"]+)"/, '"type": <span class="text-primary">""</span>')
+
+              return (
+                <p
+                  key={`${event}-${index}`}
+                  className="font-mono text-[11px] leading-relaxed text-muted-foreground break-all"
+                  dangerouslySetInnerHTML={{ __html: coloredEvent }}
+                />
+              )
+            })}
           </motion.div>
         </div>
       </div>
