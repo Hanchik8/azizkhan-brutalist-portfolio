@@ -1,9 +1,14 @@
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { timeline } from '../data/timeline'
 
+/* ── Animation variants ── */
 const lineVariants = {
   hidden: { scaleY: 0 },
-  visible: { scaleY: 1, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+  visible: {
+    scaleY: 1,
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  },
 }
 
 const itemVariants = {
@@ -11,13 +16,242 @@ const itemVariants = {
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
-    transition: { delay: 0.2 + i * 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    transition: {
+      delay: 0.2 + i * 0.15,
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
   }),
 }
 
+/* ── Telemetry data ── */
+const SERVICES = [
+  { name: 'AUTH_SERVICE', port: 8081 },
+  { name: 'PRODUCT_SERVICE', port: 8082 },
+  { name: 'ORDER_SERVICE', port: 8083 },
+  { name: 'INVENTORY_SERVICE', port: 8084 },
+] as const
+
+const LOG_LINES = [
+  '[INFO ] c.a.p.order.OrderService       : Saga transaction initiated for order #38291',
+  '[DEBUG] c.a.p.inv.InventoryService     : Stock reserved for SKU-1847',
+  '[INFO ] c.a.p.auth.JwtFilter           : Token validated for user aziz_dev',
+  '[DEBUG] c.a.p.product.ProductCache     : Cache HIT for product catalog v3',
+  '[INFO ] c.a.p.kafka.EventBus           : Published order.created to topic orders.v1',
+  '[DEBUG] c.a.p.redis.SessionStore       : Session refreshed, TTL reset to 3600s',
+  '[INFO ] c.a.p.gateway.RateLimiter      : 142 req/s — within threshold',
+  '[INFO ] c.a.p.order.SagaOrchestrator   : Payment confirmed, shipping dispatched',
+  '[DEBUG] c.a.p.inv.StockWatcher         : Low stock alert for SKU-0092 (qty: 4)',
+  '[INFO ] c.a.p.metrics.PrometheusExport : Scrape completed — 847 series exported',
+  '[DEBUG] c.a.p.auth.OAuth2Handler       : Refresh token rotated for session #7721',
+  '[INFO ] c.a.p.product.SearchIndex      : Reindexed 2,340 products in 1.2s',
+]
+
+/* ── Fluctuating metric hook ── */
+function useFluctuatingMetric(min: number, max: number, intervalMs: number) {
+  const [value, setValue] = useState(
+    Math.floor(Math.random() * (max - min + 1)) + min,
+  )
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setValue(Math.floor(Math.random() * (max - min + 1)) + min)
+    }, intervalMs)
+    return () => clearInterval(id)
+  }, [min, max, intervalMs])
+
+  return value
+}
+
+/* ── Animated counter on scroll ── */
+function useScrollCounter(target: number, duration = 1200) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  const animated = useRef(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !animated.current) {
+          animated.current = true
+          const start = performance.now()
+          const step = (now: number) => {
+            const p = Math.min((now - start) / duration, 1)
+            const eased = 1 - Math.pow(1 - p, 3)
+            setCount(Math.round(eased * target))
+            if (p < 1) requestAnimationFrame(step)
+          }
+          requestAnimationFrame(step)
+        }
+      },
+      { threshold: 0.3 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [target, duration])
+
+  return { count, ref }
+}
+
+/* ── Metric card ── */
+function MetricCard({
+  label,
+  value,
+  suffix = '',
+  pulse = false,
+}: {
+  label: string
+  value: string | number
+  suffix?: string
+  pulse?: boolean
+}) {
+  return (
+    <div className="border border-border bg-card p-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground mb-2">
+        {label}
+      </p>
+      <div className="flex items-center gap-2">
+        {pulse && (
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping bg-primary opacity-75" />
+            <span className="relative inline-flex h-2 w-2 bg-primary" />
+          </span>
+        )}
+        <span className="font-mono text-xl text-primary">
+          {value}
+          {suffix}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/* ── Service status row ── */
+function ServiceStatus({
+  name,
+  port,
+}: {
+  name: string
+  port: number
+}) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-b-0">
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping bg-primary opacity-60" />
+          <span className="relative inline-flex h-2 w-2 bg-primary" />
+        </span>
+        <span className="font-mono text-xs text-secondary-foreground uppercase tracking-wider">
+          {name}
+        </span>
+      </div>
+      <span className="font-mono text-[10px] text-muted-foreground">
+        :{port} UP
+      </span>
+    </div>
+  )
+}
+
+/* ── Telemetry dashboard ── */
+function TelemetryDashboard() {
+  const latency = useFluctuatingMetric(28, 62, 1800)
+  const cacheHit = useFluctuatingMetric(91, 96, 2200)
+  const { count: kafkaTopics, ref: kafkaRef } = useScrollCounter(8)
+
+  const repeatedLogs = [...LOG_LINES, ...LOG_LINES]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, ease: [0.0, 0.0, 0.2, 1] }}
+      className="hidden lg:flex flex-col gap-6 border-l border-primary/20 pl-10"
+    >
+      {/* Header */}
+      <div>
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-3">
+          03 // INFRA // METRICS // LIVE_VIEW
+        </p>
+        <h3 className="text-2xl xl:text-3xl font-bold uppercase tracking-tight text-foreground leading-none">
+          SYSTEM_METRICS
+        </h3>
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-md">
+          Simulated telemetry panel — real-time view of microservices health,
+          latency, and cache performance.
+        </p>
+      </div>
+
+      {/* Metrics grid */}
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+        <MetricCard label="GATEWAY_LATENCY" value={latency} suffix="ms" pulse />
+        <MetricCard label="REDIS_HIT_RATIO" value={cacheHit} suffix="%" pulse />
+        <div ref={kafkaRef}>
+          <MetricCard label="KAFKA_TOPICS" value={kafkaTopics} />
+        </div>
+      </div>
+
+      {/* Service status */}
+      <div className="border border-border bg-card p-5">
+        <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
+          <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">
+            [SERVICE_HEALTH]
+          </p>
+          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            ALL SYSTEMS NOMINAL
+          </span>
+        </div>
+        {SERVICES.map((s) => (
+          <ServiceStatus key={s.name} name={s.name} port={s.port} />
+        ))}
+      </div>
+
+      {/* Log console */}
+      <div className="relative overflow-hidden border border-border bg-card p-5">
+        <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
+          <p className="font-mono text-xs uppercase tracking-[0.28em] text-primary">
+            [SERVER_LOG // RUNNING]
+          </p>
+          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+            spring-boot/runtime
+          </span>
+        </div>
+
+        <div className="relative h-48 overflow-hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-card to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-card to-transparent z-10" />
+          <motion.div
+            animate={{ y: ['0%', '-50%'] }}
+            transition={{ duration: 22, ease: 'linear', repeat: Infinity }}
+            className="space-y-2.5"
+          >
+            {repeatedLogs.map((line, index) => (
+              <p
+                key={`${line}-${index}`}
+                className="font-mono text-[11px] leading-relaxed text-muted-foreground/90 whitespace-nowrap"
+              >
+                {line}
+              </p>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/* ── Main component ── */
 export default function Timeline() {
   return (
-    <section id="timeline" aria-label="Experience Timeline" className="py-24 px-6 md:px-12 lg:px-20">
+    <section
+      id="timeline"
+      aria-label="Experience Timeline"
+      className="py-24 px-6 md:px-12 lg:px-20"
+    >
       {/* Section heading */}
       <div className="mb-16">
         <motion.span
@@ -47,62 +281,62 @@ export default function Timeline() {
         />
       </div>
 
-      {/* Timeline */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-60px' }}
-        className="relative ml-4 md:ml-8"
-      >
-        {/* Vertical line */}
+      {/* Two-column layout */}
+      <div className="grid gap-12 lg:grid-cols-[1fr_minmax(340px,0.45fr)]">
+        {/* Left: Timeline */}
         <motion.div
-          variants={lineVariants}
-          className="absolute left-0 top-0 bottom-0 w-px bg-border origin-top"
-        />
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          className="relative ml-4 md:ml-8"
+        >
+          <motion.div
+            variants={lineVariants}
+            className="absolute left-0 top-0 bottom-0 w-px bg-border origin-top"
+          />
 
-        <div className="flex flex-col gap-10 md:gap-12">
-          {timeline.map((event, i) => (
-            <motion.div
-              key={`${event.year}-${event.title}`}
-              variants={itemVariants}
-              custom={i}
-              className="relative pl-8 md:pl-12 group"
-            >
-              {/* Dot on the line */}
-              <div className="absolute left-0 top-1.5 -translate-x-1/2 w-3 h-3 border-2 border-border bg-background group-hover:border-primary group-hover:bg-primary transition-colors duration-200" />
+          <div className="flex flex-col gap-10 md:gap-12">
+            {timeline.map((event, i) => (
+              <motion.div
+                key={`${event.year}-${event.title}`}
+                variants={itemVariants}
+                custom={i}
+                className="relative pl-8 md:pl-12 group"
+              >
+                <div className="absolute left-0 top-1.5 -translate-x-1/2 w-3 h-3 border-2 border-border bg-background group-hover:border-primary group-hover:bg-primary transition-colors duration-200" />
 
-              {/* Year badge */}
-              <span className="inline-block font-mono text-xs tracking-[0.3em] text-primary uppercase mb-2 border border-primary/30 px-2 py-0.5">
-                {event.year}
-              </span>
+                <span className="inline-block font-mono text-xs tracking-[0.3em] text-primary uppercase mb-2 border border-primary/30 px-2 py-0.5">
+                  {event.year}
+                </span>
 
-              {/* Title */}
-              <h3 className="text-lg md:text-xl font-bold text-foreground uppercase tracking-tight mb-1">
-                {event.title}
-              </h3>
+                <h3 className="text-lg md:text-xl font-bold text-foreground uppercase tracking-tight mb-1">
+                  {event.title}
+                </h3>
 
-              {/* Description */}
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
-                {event.description}
-              </p>
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-lg">
+                  {event.description}
+                </p>
 
-              {/* Tags */}
-              {event.tags && event.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {event.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 text-xs font-mono border border-border text-muted-foreground uppercase tracking-wider"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+                {event.tags && event.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {event.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 text-xs font-mono border border-border text-muted-foreground uppercase tracking-wider"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Right: Telemetry dashboard (desktop only) */}
+        <TelemetryDashboard />
+      </div>
     </section>
   )
 }

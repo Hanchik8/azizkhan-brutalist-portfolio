@@ -23,8 +23,8 @@ const cardVariants = {
 
 const manifestoPrinciples = [
   'SOLID // maintainable service boundaries',
-  'ЧИСТАЯ АРХИТЕКТУРА // domain first, framework second',
-  'МИКРОСЕРВИСЫ // autonomy, observability, resilience',
+  'CLEAN ARCHITECTURE // domain first, framework second',
+  'MICROSERVICES // autonomy, observability, resilience',
   'CQRS / SAGA // eventual consistency for real systems',
 ]
 
@@ -111,8 +111,8 @@ export default function Skills() {
               THE_MANIFESTO
             </h3>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-secondary-foreground">
-              Проектирую backend-системы так, чтобы они выдерживали рост нагрузки, команд и
-              бизнес-логики без хаоса в коде и инфраструктуре.
+              I design backend systems that scale with growing traffic, teams, and
+              business logic — without chaos in code or infrastructure.
             </p>
           </div>
 
