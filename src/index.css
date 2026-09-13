@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: hsl(72 90% 55% / 0.3);
+    color: hsl(0 0% 93%);
+  }
+}
+
+/* ── Brutalist Dark Palette ── */
+:root {
+  --background: 0 0% 3.5%;
+  --foreground: 0 0% 93%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 93%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 0 0% 93%;
+  --primary: 72 90% 62%;
+  --primary-foreground: 0 0% 3.5%;
+  --secondary: 0 0% 11%;
+  --secondary-foreground: 0 0% 80%;
+  --muted: 0 0% 11%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 72% 51%;
+  --accent-foreground: 0 0% 93%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 93%;
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 72 90% 62%;
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+  --radius-full: 9999px;
+
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-heading: 1.1;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-card: none;
+
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --sidebar: 0 0% 7%;
+  --sidebar-foreground: 0 0% 93%;
+  --sidebar-primary: 72 90% 62%;
+  --sidebar-primary-foreground: 0 0% 3.5%;
+  --sidebar-accent: 0 72% 51%;
+  --sidebar-accent-foreground: 0 0% 93%;
+  --sidebar-border: 0 0% 15%;
+  --sidebar-ring: 72 90% 62%;
+
+  --chart-1: 72 90% 62%;
+  --chart-2: 30 80% 65%;
+  --chart-3: 200 80% 55%;
+  --chart-4: 0 72% 51%;
+  --chart-5: 0 0% 93%;
+
+  --tracking-normal: -0.01em;
+  --spacing: 0.25rem;
+}
+
+:root.dark {
+  --background: 0 0% 3.5%;
+  --foreground: 0 0% 93%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 93%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 0 0% 93%;
+  --primary: 72 90% 62%;
+  --primary-foreground: 0 0% 3.5%;
+  --secondary: 0 0% 11%;
+  --secondary-foreground: 0 0% 80%;
+  --muted: 0 0% 11%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 72% 51%;
+  --accent-foreground: 0 0% 93%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 93%;
+  --border: 0 0% 15%;
+  --input: 0 0% 15%;
+  --ring: 72 90% 62%;
+  --sidebar: 0 0% 7%;
+  --sidebar-foreground: 0 0% 93%;
+  --sidebar-primary: 72 90% 62%;
+  --sidebar-primary-foreground: 0 0% 3.5%;
+  --sidebar-accent: 0 72% 51%;
+  --sidebar-accent-foreground: 0 0% 93%;
+  --sidebar-border: 0 0% 15%;
+  --sidebar-ring: 72 90% 62%;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 3.5%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 20%);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 30%);
+}
+
+/* ── Horizontal scroll section ── */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Noise texture overlay ── */
+.noise-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* ── Grid lines ── */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, hsl(0 0% 15% / 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(0 0% 15% / 0.3) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* ── Skip to content ── */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: hsl(var(--primary-foreground));
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--primary));
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── JSON Syntax Highlighting ── */
+.json-key {
+  color: hsl(72 90% 62%);
+}
+.json-string {
+  color: hsl(30 80% 65%);
+}
+.json-number {
+  color: hsl(200 80% 55%);
+}
+.json-bool {
+  color: hsl(0 72% 51%);
+}
+
+/* ── React Flow Brutalist Overrides ── */
+.architecture-flow .react-flow__pane {
+  cursor: grab;
+}
+.architecture-flow .react-flow__pane:active {
+  cursor: grabbing;
+}
+.architecture-flow .react-flow__node {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.architecture-flow .react-flow__node:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Controls */
+.architecture-controls {
+  border: 2px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: hsl(0 0% 5%) !important;
+}
+.architecture-controls button {
+  border: none !important;
+  border-bottom: 1px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+  background: hsl(0 0% 7%) !important;
+  fill: hsl(0 0% 45%) !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+.architecture-controls button:hover {
+  background: hsl(0 0% 12%) !important;
+  fill: hsl(72 90% 62%) !important;
+}
+.architecture-controls button:last-child {
+  border-bottom: none !important;
+}
+
+/* Minimap */
+.architecture-minimap {
+  border: 2px solid hsl(0 0% 15%) !important;
+  border-radius: 0 !important;
+}
+
+/* Edge animation keyframes */
+@keyframes flowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+.architecture-flow .react-flow__edge-path {
+  animation: flowPulse 3s ease-in-out infinite;
+}
