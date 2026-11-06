@@ -200,7 +200,7 @@ export default function Hero() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
           >
-            PORTFOLIO / 2025
+            PORTFOLIO / {new Date().getFullYear()}
           </motion.span>
 
           <div className="flex items-center gap-3">

@@ -225,6 +225,27 @@
 
   /* ---------- Hiding and restoring layer content ---------- */
 
+  /* The page can change its own text while it is hidden (counters, live stats).
+     Those changes are kept: the layer takes the new text and is shown at once. */
+  const watched = new Map();
+  let watcher = null;
+  function watch(l, p) {
+    if (!watcher && window.MutationObserver) {
+      watcher = new MutationObserver((records) => {
+        for (const m of records) {
+          if (m.type === 'characterData') {
+            const hit = watched.get(m.target);
+            if (hit && m.target.data !== hit.p.lastWrite) { hit.p.original = m.target.data; commit(hit.l); }
+          } else {
+            m.removedNodes.forEach((n) => { const hit = watched.get(n); if (hit) commit(hit.l); });
+          }
+        }
+      });
+      watcher.observe(document.body, { characterData: true, childList: true, subtree: true });
+    }
+    watched.set(p.n, { l, p });
+  }
+
   function prepare(l) {
     if (l.type === 'media') l.el.classList.add('sw-hide');
     else if (l.type === 'box' || l.type === 'rule') l.el.classList.add('sw-nopaint');
@@ -246,7 +267,9 @@
         }
         n.parentNode.insertBefore(ghost, n.nextSibling);
         n.data = '';
-        return { n, original, shown, ghost, wrap };
+        const part = { n, original, shown, ghost, wrap, lastWrite: '' };
+        watch(l, part);
+        return part;
       });
       l.chars = l.parts.reduce((sum, p) => sum + p.shown.length, 0);
       const fs = parseFloat(getComputedStyle(l.el).fontSize) || 16;
@@ -259,13 +282,14 @@
   }
 
   function setTyped(l, count) {
+    if (l.committed) return;
     if (count === l.typed) return;
     l.typed = count;
     let left = count;
     for (const p of l.parts) {
       const k = Math.min(left, p.shown.length);
       left -= k;
-      p.n.data = p.shown.slice(0, k);
+      p.n.data = p.lastWrite = p.shown.slice(0, k);
       p.ghost.firstChild.data = p.shown.slice(k);
     }
   }
@@ -281,7 +305,8 @@
       l.el.classList.remove('sw-nopaint');
     } else {
       l.parts.forEach((p) => {
-        p.n.data = p.original;
+        watched.delete(p.n);
+        p.n.data = p.lastWrite = p.original;
         p.ghost.remove();
         if (p.wrap) {
           if (p.wrap.parentNode) p.wrap.parentNode.insertBefore(p.n, p.wrap);
@@ -770,11 +795,12 @@
             calmSince = 0;
             const max = document.documentElement.scrollHeight - innerHeight;
             // Layers left above the viewport will never be watched: finish them.
-            let below = Infinity;
+            let below = Infinity, side = false;
             for (const l of pending.slice()) {
               const r = rectOf(l);
               if (r.bottom <= 0) { pending.splice(pending.indexOf(l), 1); commit(l); if (l.wire) { fadeOut(l.wire, 320); l.wire = null; } l.state = 'done'; done++; continue; }
               if (r.top >= innerHeight * 0.6 && r.top < below) below = r.top;
+              if (r.left >= innerWidth && r.top < innerHeight && r.bottom > 0) side = true;
             }
             lastProgress = now;
             if (scrollY >= max - 2) {
@@ -783,7 +809,8 @@
             } else {
               // Step down to the next unbuilt block, but never jump more than most of a screen,
               // so tall scroll-driven sections (sticky, horizontal tracks) are walked through.
-              const step = below === Infinity ? innerHeight * (pending.length ? 0.6 : 1.1) : clamp(below - innerHeight * 0.16, innerHeight * 0.25, innerHeight * 0.85);
+              // Nothing left below means the rest sits on a horizontal track: cross it in big strides.
+              const step = side ? innerHeight : below === Infinity ? innerHeight * (pending.length ? 1.0 : 1.1) : clamp(below - innerHeight * 0.16, innerHeight * 0.25, innerHeight * 0.85);
               camTarget = clamp(scrollY + step, 0, max);
               camY = scrollY;
             }
@@ -945,6 +972,7 @@
       clearTimeout(watchdog);
       cancelAnimationFrame(raf);
       layers.forEach(commit);
+      if (watcher && !watched.size) { watcher.disconnect(); watcher = null; }
       removeEventListener('wheel', onUser);
       removeEventListener('touchmove', onUser);
       removeEventListener('keydown', onKey);

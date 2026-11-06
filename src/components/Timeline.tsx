@@ -226,8 +226,8 @@ function TelemetryDashboard() {
           >
             {repeatedEvents.map((event, index) => {
               const coloredEvent = event
-                .replace(/"topic": "([^"]+)"/, '"topic": <span class="text-accent">""</span>')
-                .replace(/"type": "([^"]+)"/, '"type": <span class="text-primary">""</span>')
+                .replace(/"topic": "([^"]+)"/, '"topic": <span class="text-accent">"$1"</span>')
+                .replace(/"type": "([^"]+)"/, '"type": <span class="text-primary">"$1"</span>')
 
               return (
                 <p
