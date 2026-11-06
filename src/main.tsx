@@ -17,7 +17,7 @@ declare global {
 }
 
 const startSwarm = () => {
-  const go = () => window.Swarm?.run({ agents: 24, mobileAgents: 10, speed: 1.2, tour: true, returnToTop: true, targetSeconds: 12 })
+  const go = () => window.Swarm?.run({ agents: 18, mobileAgents: 8, speed: 1.2, tour: true, returnToTop: true, targetSeconds: 12 })
   const ready = document.fonts ? document.fonts.ready : Promise.resolve()
   ready.then(() => requestAnimationFrame(() => setTimeout(go, 400)))
 }
