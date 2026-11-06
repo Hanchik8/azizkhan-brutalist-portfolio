@@ -19,8 +19,8 @@ export const contactLinks = [
   },
   {
     icon: 'ExternalLink',
-    label: 'Portfolio',
-    value: 'azizkhan.dev',
-    href: 'https://azizkhan.dev',
+    label: 'LinkedIn',
+    value: 'linkedin.com/in/han228',
+    href: 'https://www.linkedin.com/in/han228',
   },
 ]

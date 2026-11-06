@@ -60,6 +60,7 @@ export default function FloatingNav() {
   }, [])
 
   return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-3">
     <AnimatePresence>
       {isVisible && (
         <motion.nav
@@ -69,7 +70,7 @@ export default function FloatingNav() {
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 24 }}
           className={cn(
-            'fixed bottom-6 left-1/2 z-40 -translate-x-1/2',
+            'pointer-events-auto max-w-full',
             'flex items-center gap-1 px-2 py-2',
             'rounded-full border border-border',
             'bg-secondary/80 backdrop-blur-xl',
@@ -119,5 +120,6 @@ export default function FloatingNav() {
         </motion.nav>
       )}
     </AnimatePresence>
+    </div>
   )
 }

@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router'
 import HomePage from './pages/HomePage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 /* ─── Root Route ─── */
 const rootRoute = createRootRoute({
@@ -37,7 +38,7 @@ const projectDetailRoute = createRoute({
 
 /* ─── Router ─── */
 const routeTree = rootRoute.addChildren([indexRoute, projectDetailRoute])
-const router = createRouter({ routeTree })
+const router = createRouter({ routeTree, defaultNotFoundComponent: () => <NotFoundPage /> })
 
 declare module '@tanstack/react-router' {
   interface Register {

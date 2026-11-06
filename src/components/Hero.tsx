@@ -167,7 +167,8 @@ function ContactPill({ label, fullLabel, href, delay }: {
       href={href}
       target={href.startsWith('http') ? '_blank' : undefined}
       rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-      aria-label={fullLabel}
+      aria-label={`${label} ${fullLabel}`}
+      title={fullLabel}
       className="border border-border px-3 py-1.5 font-mono text-xs tracking-widest text-muted-foreground transition-colors duration-200 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 active:scale-95"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -263,7 +264,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.3, duration: 0.6 }}
             >
-              Java backend intern, 2nd year student at AIU.
+              Java backend intern, 3rd year student at AIU.
               <br />
               I learn technologies quickly and apply them immediately.
             </motion.p>

@@ -33,7 +33,7 @@ function TooltipCard({ nodeId, x, y }: { nodeId: string; x: 'left' | 'right'; y:
       </div>
       {details.port && (
         <div className="mt-2 text-muted-foreground text-[10px]">
-          PORT: <span className="text-accent">{details.port}</span>
+          PORT: <span className="text-[#ff6b6b]">{details.port}</span>
         </div>
       )}
     </motion.div>
@@ -133,21 +133,21 @@ export const ServiceNode = memo(({ id, data }: { id: string; data: { label: stri
 ServiceNode.displayName = 'ServiceNode'
 
 export const InfraNode = memo(({ id, data }: { id: string; data: { label: string; sublabel: string } }) => (
-  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(0, 0%, 45%)" iconChar="IF" iconBg="hsl(0, 0%, 45%, 0.1)" />
+  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(0, 0%, 62%)" iconChar="IF" iconBg="hsl(0, 0%, 62%, 0.1)" />
 ))
 InfraNode.displayName = 'InfraNode'
 
 export const DbNode = memo(({ id, data }: { id: string; data: { label: string; sublabel: string } }) => (
-  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(200, 80%, 55%)" iconChar="DB" iconBg="hsl(200, 80%, 55%, 0.1)" />
+  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(200, 80%, 62%)" iconChar="DB" iconBg="hsl(200, 80%, 62%, 0.1)" />
 ))
 DbNode.displayName = 'DbNode'
 
 export const BrokerNode = memo(({ id, data }: { id: string; data: { label: string; sublabel: string } }) => (
-  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(0, 72%, 51%)" iconChar="MQ" iconBg="hsl(0, 72%, 51%, 0.1)" />
+  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(0, 85%, 68%)" iconChar="MQ" iconBg="hsl(0, 85%, 68%, 0.1)" />
 ))
 BrokerNode.displayName = 'BrokerNode'
 
 export const ObserveNode = memo(({ id, data }: { id: string; data: { label: string; sublabel: string } }) => (
-  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(280, 70%, 55%)" iconChar="OB" iconBg="hsl(280, 70%, 55%, 0.1)" />
+  <BaseNode id={id} label={data.label} sublabel={data.sublabel} borderColor="hsl(280, 75%, 72%)" iconChar="OB" iconBg="hsl(280, 75%, 72%, 0.1)" />
 ))
 ObserveNode.displayName = 'ObserveNode'

@@ -173,7 +173,7 @@ export default function Contact() {
         className="mb-16"
       >
         <p className="font-mono text-sm tracking-widest text-primary uppercase mb-3">
-          {'// contact'}
+          {'// 06 // contact'}
         </p>
         <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-foreground">
           GET IN TOUCH

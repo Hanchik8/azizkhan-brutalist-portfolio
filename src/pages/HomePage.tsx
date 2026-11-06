@@ -24,6 +24,7 @@ export default function HomePage() {
   return (
     <div className="noise-bg bg-background text-foreground">
       <a href="#skills" className="skip-link">Skip to content</a>
+      <main>
       <Hero />
       <Stats />
       <Skills />
@@ -34,6 +35,7 @@ export default function HomePage() {
       <Suspense fallback={<SectionFallback />}>
         <Contact />
       </Suspense>
+      </main>
       <Suspense fallback={<SectionFallback />}>
         <Footer />
       </Suspense>

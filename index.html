@@ -5,10 +5,33 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Azizkhan Nurlanov — Java Backend Developer. Spring Boot, microservices, PostgreSQL." />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="canonical" href="https://azizkhan.dev/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Azizkhan Nurlanov" />
+    <meta property="og:title" content="Azizkhan — Java Backend Developer" />
+    <meta property="og:description" content="Spring Boot, Kafka, Redis, PostgreSQL. Microservices case studies and projects." />
+    <meta property="og:url" content="https://azizkhan.dev/" />
+    <meta property="og:image" content="https://azizkhan.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Azizkhan — Java Backend Developer" />
+    <meta name="twitter:description" content="Spring Boot, Kafka, Redis, PostgreSQL. Microservices case studies and projects." />
+    <meta name="twitter:image" content="https://azizkhan.dev/og.png" />
     <style>html.sw-boot { background: #0a0a0a; } html.sw-boot body { opacity: 0 !important; }</style>
     <script>
-      // Hide the finished page until the swarm starts building it, so it never flashes first
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // The swarm intro plays on the first visit (and again after a week, or with ?intro in the URL).
+      // Hide the finished page until the swarm starts building it, so it never flashes first.
+      window.__swarmIntro = (function () {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+        if (/[?&]intro\b/.test(location.search)) return true
+        try {
+          var seen = +localStorage.getItem('sw-intro-seen') || 0
+          return Date.now() - seen > 7 * 24 * 3600 * 1000
+        } catch (e) { return true }
+      })()
+      if (window.__swarmIntro) {
         document.documentElement.classList.add('sw-boot')
         setTimeout(function () { document.documentElement.classList.remove('sw-boot') }, 4000)
       }
