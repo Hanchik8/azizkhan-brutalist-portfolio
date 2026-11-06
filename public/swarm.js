@@ -286,6 +286,8 @@
     let frameCandidates = null;
     const layers = scan(document.body);
     layers.forEach(prepare);
+    // Slower, more readable build: stretch every layer's work time.
+    layers.forEach((l) => { l.d *= opt.pace || 1; });
 
     // Estimate the build time from the amount of work and scrolling, then speed
     // up as needed so long pages and small screens don't keep visitors waiting.
@@ -431,7 +433,7 @@
         for (const l of pending.slice()) {
           // The page may have removed or hidden this since the scan. Don't wait for it.
           const r = l.el.isConnected ? rectOf(l) : null;
-          if (!r || (r.width === 0 && r.height === 0)) {
+          if (!r || (r.width === 0 && r.height === 0) || r.right <= 0 || r.left >= innerWidth) {
             pending.splice(pending.indexOf(l), 1);
             commit(l);
             l.state = 'done';
@@ -714,17 +716,31 @@
       if (camTarget === null) {
         const busy = agents.filter((a) => a.task).length;
         let wantsScroll = false;
-        if (pending.length && busy <= Math.max(2, activeCount * 0.15)) {
-          wantsScroll = !candidates().length && !inView(rectOf(pending[0]));
+        let next = null;
+        if (pending.length && busy <= Math.max(2, activeCount * 0.15) && !candidates().length) {
+          // Nearest unbuilt layer off screen, preferring what is below.
+          let best = Infinity;
+          for (const l of pending) {
+            const r = rectOf(l);
+            if (inView(r)) continue;
+            const d = r.top >= innerHeight ? r.top - innerHeight : 1e6 - r.bottom;
+            if (d < best) { best = d; next = l; }
+          }
+          // Everything left is on screen but waiting on something: unblock it.
+          if (!next && !busy) {
+            const l = pending.shift();
+            commit(l); l.state = 'done'; done++; lastProgress = now;
+          }
+          wantsScroll = !!next;
         }
         if (!wantsScroll) {
           calmSince = 0;
         } else {
           // Hold for a moment so each finished screen can be seen before moving on.
           if (!calmSince) calmSince = now;
-          if (now - calmSince > 650 / (speed * sizeRate)) {
+          if (now - calmSince > 1100 / (speed * sizeRate)) {
             const max = document.documentElement.scrollHeight - innerHeight;
-            camTarget = clamp(scrollY + rectOf(pending[0]).top - innerHeight * 0.16, 0, max);
+            camTarget = clamp(scrollY + rectOf(next).top - innerHeight * 0.16, 0, max);
             camY = scrollY;
             calmSince = 0;
           }
