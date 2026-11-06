@@ -23,14 +23,26 @@ const startSwarm = () => {
     try {
       if (window.Swarm && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 1.25, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 30, maxSeconds: 70 })
+        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 2.5, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 20, maxSeconds: 70 })
       }
     } finally {
       unboot()
     }
   }
   const fonts = document.fonts ? document.fonts.ready : Promise.resolve()
-  Promise.race([fonts, new Promise((r) => setTimeout(r, 800))]).then(() => requestAnimationFrame(() => requestAnimationFrame(go)))
+  // Lazy sections (Timeline, Contact, Footer) must be in the page before the swarm scans it,
+  // otherwise they skip the build and simply appear.
+  const lazyReady = new Promise<void>((resolve) => {
+    const t0 = performance.now()
+    const check = () => {
+      const home = document.querySelector('#hero')
+      const mounted = document.getElementById('root')?.children.length && !document.querySelector('[data-swarm-fallback]') && (!home || document.querySelector('footer'))
+      if (mounted || performance.now() - t0 > 5000) resolve()
+      else setTimeout(check, 50)
+    }
+    check()
+  })
+  Promise.all([Promise.race([fonts, new Promise((r) => setTimeout(r, 800))]), lazyReady]).then(() => requestAnimationFrame(() => requestAnimationFrame(go)))
 }
 
 if (document.readyState === 'complete') startSwarm()
