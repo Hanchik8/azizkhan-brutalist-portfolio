@@ -50,7 +50,7 @@ function LevelBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
     INFO: 'text-primary',
     DEBUG: 'text-muted-foreground',
-    WARN: 'text-accent',
+    WARN: 'text-[#ff6b6b]',
   }
   return <span className={`${colors[level] || 'text-foreground'} font-bold`}>[{level}]</span>
 }
@@ -106,7 +106,7 @@ export default function ServerStatus() {
       {/* Heading */}
       <div className="mb-12">
         <motion.span {...sectionAnim(0)} className="font-mono text-sm tracking-widest text-primary uppercase block mb-3">
-          {'// 05'}
+          {'// 02'}
         </motion.span>
         <motion.h2 {...sectionAnim(0.1)} className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight text-foreground">
           SERVER STATUS
@@ -136,21 +136,21 @@ export default function ServerStatus() {
           label="Kafka Topics"
           value={topics}
           unit="active"
-          color="hsl(0, 72%, 51%)"
+          color="hsl(0, 85%, 68%)"
           subtitle="event streams"
         />
         <MetricCard
           label="Redis Cache Hit"
           value={cacheHit}
           unit="%"
-          color="hsl(200, 80%, 55%)"
+          color="hsl(200, 80%, 62%)"
           subtitle="cache efficiency"
         />
         <MetricCard
           label="DB Connections"
           value={dbConns}
           unit="pool"
-          color="hsl(280, 70%, 55%)"
+          color="hsl(280, 75%, 72%)"
           subtitle="PostgreSQL active"
         />
       </motion.div>
@@ -188,17 +188,20 @@ export default function ServerStatus() {
                 spring-boot.log
               </span>
             </div>
-            <span className="font-mono text-[10px] text-muted-foreground/50">
+            <span className="font-mono text-[10px] text-muted-foreground">
               {logs.length} lines
             </span>
           </div>
           <div
             ref={logRef}
+            tabIndex={0}
+            role="log"
+            aria-label="Spring Boot log"
             className="p-4 h-[360px] overflow-y-auto font-mono text-[11px] leading-relaxed space-y-0.5 hide-scrollbar"
           >
             {logs.map((log, i) => (
               <div key={i} className="flex gap-2 text-muted-foreground hover:text-foreground transition-colors duration-100">
-                <span className="text-muted-foreground/40 flex-shrink-0">{log.time}</span>
+                <span className="text-muted-foreground flex-shrink-0">{log.time}</span>
                 <LevelBadge level={log.level} />
                 <span className="text-foreground/60 flex-shrink-0">{log.service}:</span>
                 <span className="text-foreground/80">{log.msg}</span>

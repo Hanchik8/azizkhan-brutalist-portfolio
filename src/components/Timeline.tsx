@@ -170,7 +170,7 @@ function TelemetryDashboard() {
       {/* Header */}
       <div>
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary mb-3">
-          03 // INFRA // METRICS // LIVE_VIEW
+          05 // INFRA // METRICS // LIVE_VIEW
         </p>
         <h3 className="text-2xl xl:text-3xl font-bold uppercase tracking-tight text-foreground leading-none">
           SYSTEM_METRICS
@@ -226,12 +226,13 @@ function TelemetryDashboard() {
           >
             {repeatedEvents.map((event, index) => {
               const coloredEvent = event
-                .replace(/"topic": "([^"]+)"/, '"topic": <span class="text-accent">"$1"</span>')
+                .replace(/"topic": "([^"]+)"/, '"topic": <span class="text-[#ff6b6b]">"$1"</span>')
                 .replace(/"type": "([^"]+)"/, '"type": <span class="text-primary">"$1"</span>')
 
               return (
                 <p
                   key={`${event}-${index}`}
+                  aria-hidden={index >= KAFKA_EVENTS.length || undefined}
                   className="font-mono text-[11px] leading-relaxed text-muted-foreground break-all"
                   dangerouslySetInnerHTML={{ __html: coloredEvent }}
                 />
@@ -261,7 +262,7 @@ export default function Timeline() {
           transition={{ duration: 0.4 }}
           className="font-mono text-sm tracking-widest text-primary uppercase block mb-3"
         >
-          {'// 03'}
+          {'// 04'}
         </motion.span>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}

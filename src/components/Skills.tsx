@@ -47,10 +47,10 @@ function getBentoClasses(skill: Skill): string {
   if (!skill.featured) return ''
 
   const featuredPatterns = [
-    'md:col-span-2',
-    'md:col-span-2 md:row-span-2',
-    'md:row-span-2',
-    'md:col-span-2',
+    'lg:col-span-2',
+    'lg:col-span-2 lg:row-span-2',
+    'lg:row-span-2',
+    'lg:col-span-2',
   ]
 
   const featuredIndex = skills.filter((s) => s.featured).indexOf(skill)
@@ -156,6 +156,7 @@ export default function Skills() {
                 {repeatedLogLines.map((line, index) => (
                   <p
                     key={`${line}-${index}`}
+                    aria-hidden={index >= systemLogLines.length || undefined}
                     className="font-mono text-[11px] sm:text-xs leading-relaxed text-muted-foreground/90"
                   >
                     {line}

@@ -27,8 +27,8 @@ export const timeline: TimelineEvent[] = [
   },
   {
     year: '2025',
-    title: 'Backend Internship',
-    description: 'Java Backend Intern — applying Spring Boot, microservices, and DevOps in production environment.',
+    title: 'Backend Internship at O!',
+    description: 'Java Backend Intern at O! (mobile operator) — applying Spring Boot, microservices, and DevOps in production environment.',
     tags: ['Spring Boot', 'Docker'],
   },
 ]

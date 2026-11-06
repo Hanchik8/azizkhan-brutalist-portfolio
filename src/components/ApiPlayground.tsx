@@ -58,13 +58,13 @@ export default function ApiPlayground() {
       {/* Heading */}
       <div className="mb-12">
         <motion.span {...sectionAnim(0)} className="font-mono text-sm tracking-widest text-primary uppercase block mb-3">
-          {'// 06'}
+          {'// 03'}
         </motion.span>
         <motion.h2 {...sectionAnim(0.1)} className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight text-foreground">
           API PLAYGROUND
         </motion.h2>
         <motion.p {...sectionAnim(0.2)} className="mt-3 font-mono text-sm text-muted-foreground">
-          Interactive REST API — Explore the Portfolio Data
+          Mock REST API — responses are simulated in the browser
         </motion.p>
         <motion.div
           initial={{ scaleX: 0 }}
@@ -85,9 +85,10 @@ export default function ApiPlayground() {
                 GET
               </span>
               <span className="px-3 py-2.5 font-mono text-xs text-muted-foreground flex-shrink-0">
-                https://azizkhan.dev/api
+                mock://api
               </span>
               <select
+                aria-label="Endpoint"
                 value={selectedEndpoint}
                 onChange={(e) => setSelectedEndpoint(e.target.value)}
                 className="flex-1 bg-transparent font-mono text-xs text-foreground px-2 py-2.5 outline-none cursor-pointer appearance-none"
@@ -160,7 +161,7 @@ export default function ApiPlayground() {
               </div>
             )}
             {!isLoading && !response && (
-              <div className="text-muted-foreground/50 flex flex-col items-center justify-center h-full gap-3">
+              <div className="text-muted-foreground flex flex-col items-center justify-center h-full gap-3">
                 <span className="text-4xl">{'{ }'}</span>
                 <span className="text-[11px] uppercase tracking-widest">Send a request to see the response</span>
               </div>

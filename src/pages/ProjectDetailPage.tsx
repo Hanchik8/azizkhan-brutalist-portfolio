@@ -3,6 +3,7 @@ import { useParams, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { projects } from '../data/projects'
+import NotFoundPage from './NotFoundPage'
 
 /* ── Lazy-load heavy components ── */
 const Architecture = lazy(() => import('../components/Architecture'))
@@ -34,7 +35,7 @@ const SECTIONS = [
 
 function DetailNav() {
   return (
-    <div className="sticky top-0 z-30 border-b-2 border-border bg-background/90 backdrop-blur-sm">
+    <nav aria-label="Project sections" className="sticky top-0 z-30 border-b-2 border-border bg-background/90 backdrop-blur-sm">
       <div className="px-6 md:px-12 lg:px-20">
         <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar py-3">
           {SECTIONS.map((s) => (
@@ -48,7 +49,7 @@ function DetailNav() {
           ))}
         </div>
       </div>
-    </div>
+    </nav>
   )
 }
 
@@ -60,21 +61,16 @@ export default function ProjectDetailPage() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [slug])
 
-  if (!project) {
-    return (
-      <div className="noise-bg bg-background text-foreground min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="font-mono text-6xl text-primary">404</div>
-          <p className="font-mono text-sm text-muted-foreground">Project not found</p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 font-mono text-xs text-primary border border-primary px-4 py-2 hover:bg-primary/10 transition-colors"
-          >
-            <ArrowLeft className="w-3 h-3" /> Back to Portfolio
-          </Link>
-        </div>
-      </div>
-    )
+  useEffect(() => {
+    if (!project?.hasDetail) return
+    const prev = document.title
+    document.title = `${project.title} — Azizkhan Nurlanov`
+    return () => { document.title = prev }
+  }, [project])
+
+  // Only projects with a case study have a page; the rest are cards on the home page
+  if (!project || !project.hasDetail) {
+    return <NotFoundPage message="Project not found" />
   }
 
   const isMegaSega = slug === 'megasegashop'
@@ -82,7 +78,7 @@ export default function ProjectDetailPage() {
   return (
     <div className="noise-bg bg-background text-foreground min-h-screen">
       {/* Top bar */}
-      <div className="border-b-2 border-border px-6 md:px-12 lg:px-20 py-4">
+      <header className="border-b-2 border-border px-6 md:px-12 lg:px-20 py-4">
         <div className="flex items-center justify-between">
           <Link
             to="/"
@@ -96,6 +92,7 @@ export default function ProjectDetailPage() {
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="GitHub repository"
               className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               <span className="uppercase tracking-widest hidden sm:inline">GitHub</span>
@@ -103,10 +100,11 @@ export default function ProjectDetailPage() {
             </a>
           )}
         </div>
-      </div>
+      </header>
 
       {isMegaSega && <DetailNav />}
 
+      <main>
       {/* Project Overview */}
       <section id="overview" className="py-16 md:py-24 px-6 md:px-12 lg:px-20">
         <motion.div
@@ -117,7 +115,7 @@ export default function ProjectDetailPage() {
           <span className="font-mono text-sm tracking-widest text-primary uppercase block mb-3">
             Project {project.number}
           </span>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-foreground">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold uppercase tracking-tight text-foreground break-words">
             {project.title}
           </h1>
           <p className="mt-3 font-mono text-base text-muted-foreground max-w-2xl">
@@ -159,9 +157,10 @@ export default function ProjectDetailPage() {
           </Suspense>
         </>
       )}
+      </main>
 
       {/* Back to portfolio footer */}
-      <div className="border-t-2 border-border px-6 md:px-12 lg:px-20 py-8">
+      <footer className="border-t-2 border-border px-6 md:px-12 lg:px-20 py-8">
         <Link
           to="/"
           className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-primary transition-colors group"
@@ -169,7 +168,7 @@ export default function ProjectDetailPage() {
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
           <span className="uppercase tracking-widest">Back to Portfolio</span>
         </Link>
-      </div>
+      </footer>
     </div>
   )
 }

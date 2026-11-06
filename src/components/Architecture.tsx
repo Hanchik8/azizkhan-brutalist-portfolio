@@ -107,7 +107,7 @@ export default function Architecture() {
           transition={{ duration: 0.4 }}
           className="font-mono text-sm tracking-widest text-primary uppercase block mb-3"
         >
-          {'// 04'}
+          {'// 01'}
         </motion.span>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -148,7 +148,7 @@ export default function Architecture() {
         <button
           onClick={toggleFullscreen}
           className="absolute top-3 right-3 z-10 border-2 border-border bg-card hover:border-primary px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary transition-all duration-150"
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          aria-label={isFullscreen ? '[ EXIT ] fullscreen' : '[ EXPAND ] fullscreen'}
         >
           {isFullscreen ? '[ EXIT ]' : '[ EXPAND ]'}
         </button>
@@ -190,9 +190,9 @@ export default function Architecture() {
                 switch (node.type) {
                   case 'gatewayNode':
                   case 'serviceNode': return 'hsl(72, 90%, 62%)'
-                  case 'dbNode': return 'hsl(200, 80%, 55%)'
-                  case 'brokerNode': return 'hsl(0, 72%, 51%)'
-                  case 'observeNode': return 'hsl(280, 70%, 55%)'
+                  case 'dbNode': return 'hsl(200, 80%, 62%)'
+                  case 'brokerNode': return 'hsl(0, 85%, 68%)'
+                  case 'observeNode': return 'hsl(280, 75%, 72%)'
                   default: return 'hsl(0, 0%, 30%)'
                 }
               }}
@@ -219,19 +219,19 @@ export default function Architecture() {
           <div className="space-y-2">
             <div className="text-[9px] uppercase tracking-widest text-foreground/50 mb-1">Nodes</div>
             <LegendNode color="hsl(72, 90%, 62%)" char="GW" label="Gateway / Service" />
-            <LegendNode color="hsl(200, 80%, 55%)" char="DB" label="Database" />
-            <LegendNode color="hsl(0, 72%, 51%)" char="MQ" label="Message Broker" />
-            <LegendNode color="hsl(280, 70%, 55%)" char="OB" label="Observability" />
+            <LegendNode color="hsl(200, 80%, 62%)" char="DB" label="Database" />
+            <LegendNode color="hsl(0, 85%, 68%)" char="MQ" label="Message Broker" />
+            <LegendNode color="hsl(280, 75%, 72%)" char="OB" label="Observability" />
           </div>
           <div className="space-y-2">
             <div className="text-[9px] uppercase tracking-widest text-foreground/50 mb-1">Edges</div>
             <LegendItem color="hsl(72, 90%, 62%)" label="HTTP / REST" />
-            <LegendItem color="hsl(0, 72%, 51%)" label="Kafka Async" dashed />
+            <LegendItem color="hsl(0, 85%, 68%)" label="Kafka Async" dashed />
             <LegendItem color="hsl(0, 0%, 30%)" label="Infra / Config" dashed />
           </div>
           <div className="col-span-2 md:col-span-2">
             <div className="text-[9px] uppercase tracking-widest text-foreground/50 mb-2">Controls</div>
-            <div className="space-y-1 text-muted-foreground/70">
+            <div className="space-y-1 text-muted-foreground">
               <p>• Hover nodes for tech stack details</p>
               <p>• Drag nodes to rearrange layout</p>
               <p>• Scroll to zoom, drag canvas to pan</p>

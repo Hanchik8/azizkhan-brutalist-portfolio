@@ -103,7 +103,7 @@ export default function ProjectADR() {
       {/* Heading */}
       <div className="mb-12">
         <motion.span {...sectionAnim(0)} className="font-mono text-sm tracking-widest text-primary uppercase block mb-3">
-          {'// 07'}
+          {'// 04'}
         </motion.span>
         <motion.h2 {...sectionAnim(0.1)} className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight text-foreground">
           DESIGN DECISIONS
@@ -172,7 +172,7 @@ export default function ProjectADR() {
       <motion.div {...sectionAnim(0.7)} className="mt-3 border-2 border-border bg-card px-5 py-3 flex flex-wrap justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
         <span>Status: Accepted</span>
         <span>Date: 2025-01-15</span>
-        <span>Author: Azizkhan Nurlinov</span>
+        <span>Author: Azizkhan Nurlanov</span>
         <span>Supersedes: Monolithic Architecture</span>
       </motion.div>
     </section>

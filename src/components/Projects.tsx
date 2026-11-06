@@ -129,7 +129,7 @@ function MobileProjects() {
           viewport={{ once: true }}
           className="font-mono text-xs text-primary tracking-[0.3em] uppercase block mb-3"
         >
-          // Selected Work
+          // 03 // Selected Work
         </motion.span>
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -153,7 +153,7 @@ function MobileProjects() {
                 More coming soon
               </p>
               <div className="w-12 h-[1px] bg-border mx-auto" />
-              <p className="font-mono text-xs text-muted-foreground/60">
+              <p className="font-mono text-xs text-muted-foreground">
                 &#123; ...exploring &#125;
               </p>
             </div>
@@ -213,7 +213,7 @@ function DesktopProjects() {
                 viewport={{ once: true }}
                 className="font-mono text-xs text-primary tracking-[0.3em] uppercase block mb-3"
               >
-                // Selected Work
+                // 03 // Selected Work
               </motion.span>
               <motion.h2
                 initial={{ opacity: 0, y: 30 }}
@@ -249,15 +249,15 @@ function DesktopProjects() {
                 </div>
 
                 <div className="space-y-4">
-                  <ProjectMetric label="ACTIVE_SERVICES" value={9} />
+                  <ProjectMetric label="MICROSERVICES" value={8} />
                   <ProjectMetric label="KAFKA_TOPICS" value={8} />
                   <ProjectMetric label="DB_INSTANCES" value={3} />
                 </div>
 
                 <div className="mt-6 border-t border-border pt-4 space-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                   <p>Total Projects: {projects.length}</p>
-                  <p>Languages: Java, TS</p>
-                  <p>LOC (simulated): 148k+</p>
+                  <p>Languages: Java, SQL</p>
+                  <p>Stack: Spring / Kafka / Redis</p>
                 </div>
               </div>
             </div>
@@ -286,7 +286,7 @@ function DesktopProjects() {
                       More coming soon
                     </p>
                     <div className="w-12 h-[1px] bg-border mx-auto" />
-                    <p className="font-mono text-xs text-muted-foreground/60">
+                    <p className="font-mono text-xs text-muted-foreground">
                       &#123; ...exploring &#125;
                     </p>
                   </div>
