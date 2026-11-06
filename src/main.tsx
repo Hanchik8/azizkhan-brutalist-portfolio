@@ -23,7 +23,7 @@ const startSwarm = () => {
     try {
       if (window.Swarm && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 2.5, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 20, maxSeconds: 70 })
+        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 2, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 20, maxSeconds: 70 })
       }
     } finally {
       unboot()
