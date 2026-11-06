@@ -25,7 +25,7 @@ const startSwarm = () => {
       if (window.Swarm && window.__swarmIntro) {
         try { localStorage.setItem('sw-intro-seen', String(Date.now())) } catch { /* private mode */ }
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 2, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 20, maxSeconds: 70 })
+        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 1.6, pace: 1.8, tour: true, returnToTop: true, targetSeconds: 20, maxSeconds: 70 })
       }
     } finally {
       unboot()

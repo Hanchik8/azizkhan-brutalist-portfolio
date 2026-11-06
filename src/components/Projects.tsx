@@ -193,7 +193,7 @@ function DesktopProjects() {
   const parallaxX = useTransform(scrollYProgress, [0, 1], ['-6%', '10%'])
 
   return (
-    <div ref={sectionRef} className="hidden md:block relative h-[300vh] overflow-clip">
+    <div ref={sectionRef} className="hidden md:block relative h-[200vh] overflow-clip">
       <div className="sticky top-0 h-screen overflow-hidden border-y border-border/70 bg-background">
         <motion.div
           style={{ x: parallaxX }}
