@@ -27,26 +27,32 @@ export default function FloatingNav() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Track which section is currently in view
+  // Track which section is currently in view: the last one whose top has passed
+  // 40% of the viewport. Works for very tall sections (the sticky Projects track),
+  // which a ratio threshold never reaches.
   useEffect(() => {
     const sectionIds = NAV_ITEMS.map((item) => item.id)
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
-          }
-        })
-      },
-      { threshold: 0.3 },
-    )
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const line = window.innerHeight * 0.4
+      let current = sectionIds[0]
+      for (const id of sectionIds) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= line) current = id
+      }
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+      setActiveSection(atBottom ? sectionIds[sectionIds.length - 1] : current)
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    update()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
   }, [])
 
   const scrollTo = useCallback((id: string) => {

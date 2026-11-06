@@ -18,7 +18,7 @@ export default function Footer() {
     <footer className="border-t-2 border-border bg-background px-6 py-6 md:px-12 lg:px-20">
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <p className="font-mono text-sm tracking-widest text-muted-foreground">
-          © 2025 AZIZKHAN
+          © {new Date().getFullYear()} AZIZKHAN
         </p>
 
         <div className="flex items-center gap-4">
