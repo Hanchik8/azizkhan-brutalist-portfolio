@@ -28,7 +28,7 @@
   };
 
   const COLORS = ['#d2f547', '#ededed', '#e03131', '#d2f547', '#ededed', '#8a8a8a', '#d2f547', '#e03131'];
-  const SPEEDS = [1.25, 2.5, 5];
+  const SPEEDS = [1, 2, 4];
   const MEDIA = new Set(['IMG', 'SVG', 'CANVAS', 'VIDEO', 'PICTURE', 'IFRAME']);
 
   const CSS = `
@@ -372,9 +372,19 @@
     // The page keeps changing while it is being built: lazy sections mount, the floating
     // nav appears, live panels add lines. Anything new is hidden and queued for the cursors.
     const known = new Set();
+    const boxOf = new Map();
     const remember = (l) => {
       if (l.type === 'text') l.parts.forEach((q) => known.add(q.n));
-      else if (l.type !== 'frame') known.add(l.el);
+      else if (l.type !== 'frame') { known.add(l.el); if (l.type === 'box') boxOf.set(l.el, l); }
+    };
+    // New content inside a block the cursors already finished is a live update
+    // (log lines, metrics): it belongs to that block and is shown as is.
+    const insideBuilt = (el) => {
+      for (let e = el && el.parentElement; e && e !== document.body; e = e.parentElement) {
+        const b = boxOf.get(e);
+        if (b) return b.state === 'done';
+      }
+      return false;
     };
     layers.forEach(remember);
     let lastAdopt = 0;
@@ -384,9 +394,18 @@
       lastAdopt = now;
       const fresh = scan(document.body, known);
       if (!fresh.length) return;
-      fresh.forEach((l) => { prepare(l); l.d *= opt.pace || 1; remember(l); pending.push(l); });
-      total += fresh.length;
-      if (window.__swarmLayers) window.__swarmLayers.push(...fresh);
+      const queued = [];
+      fresh.forEach((l) => {
+        if (insideBuilt(l.el) || (l.type !== 'text' && insideBuilt(l.el.parentElement))) {
+          if (l.type === 'text') l.textNodes.forEach((n) => known.add(n));
+          else known.add(l.el);
+          (window.__swarmLive = window.__swarmLive || []).push(l);
+          return;
+        }
+        prepare(l); l.d *= opt.pace || 1; remember(l); pending.push(l); queued.push(l);
+      });
+      total += queued.length;
+      if (window.__swarmLayers) window.__swarmLayers.push(...queued);
     }
     let done = 0;
     let speed = opt.speed;
