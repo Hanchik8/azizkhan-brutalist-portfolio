@@ -28,7 +28,7 @@
   };
 
   const COLORS = ['#d2f547', '#ededed', '#e03131', '#d2f547', '#ededed', '#8a8a8a', '#d2f547', '#e03131'];
-  const SPEEDS = [1, 2, 4];
+  const SPEEDS = [1, 1.6, 2, 4];
   const MEDIA = new Set(['IMG', 'SVG', 'CANVAS', 'VIDEO', 'PICTURE', 'IFRAME']);
 
   const CSS = `
