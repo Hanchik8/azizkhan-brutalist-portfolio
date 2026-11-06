@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ExternalLink, ArrowRight } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
@@ -171,7 +171,24 @@ function DesktopProjects() {
     offset: ['start start', 'end end'],
   })
 
-  const x = useTransform(scrollYProgress, [0, 1], ['6%', '-62%'])
+  // Shift the track by exactly its overflow, so every screen size starts on the first
+  // card and ends on the last one, with a short hold at both ends.
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [shift, setShift] = useState(0)
+  useEffect(() => {
+    const measure = () => {
+      const view = viewportRef.current
+      const track = trackRef.current
+      if (view && track) setShift(Math.max(0, track.scrollWidth - view.clientWidth))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    if (viewportRef.current) ro.observe(viewportRef.current)
+    if (trackRef.current) ro.observe(trackRef.current)
+    return () => ro.disconnect()
+  }, [])
+  const x = useTransform(scrollYProgress, [0, 0.08, 0.92, 1], [0, 0, -shift, -shift])
   const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
   const parallaxX = useTransform(scrollYProgress, [0, 1], ['-6%', '10%'])
 
@@ -245,8 +262,16 @@ function DesktopProjects() {
               </div>
             </div>
 
-            <div className="relative min-w-0 overflow-hidden">
-              <motion.div style={{ x }} className="flex h-full items-center gap-6 sm:gap-8 will-change-transform">
+            {/* Cards fade out at the edges instead of being cut mid-card next to the info panel. */}
+            <div
+              ref={viewportRef}
+              className="relative min-w-0 overflow-hidden"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%)',
+              }}
+            >
+              <motion.div ref={trackRef} style={{ x }} className="flex h-full w-max items-center gap-6 sm:gap-8 px-10 will-change-transform">
                 {projects.map((project, i) => (
                   <ProjectCard
                     key={project.number}
