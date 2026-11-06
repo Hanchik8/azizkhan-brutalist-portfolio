@@ -60,6 +60,16 @@
   .sw-qa .sw-badge { background: #ededed; color: #0a0a0a; left: 0; transform: none; top: -19px; }
   .sw-qa.sw-ok { border-color: #d2f547; } .sw-qa.sw-ok .sw-badge { background: #d2f547; }
   .sw-qa.sw-out { opacity: 0; }
+  .sw-frame { border: 1px dashed rgba(210,245,71,.75); transition: opacity .3s; }
+  .sw-frame::after { content: attr(data-k); position: absolute; left: 0; top: -13px; font-size: 8px; color: rgba(210,245,71,.8); white-space: nowrap; }
+  .sw-frame.sw-out { opacity: 0; }
+  .sw-final { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.96); min-width: min(520px, 88vw); padding: 18px 20px 16px; background: #0a0a0a; border: 1px solid #d2f547; box-shadow: 8px 8px 0 #d2f547; color: #ededed; font-size: 12px; line-height: 1.7; opacity: 0; transition: opacity .25s, transform .25s; }
+  .sw-final.sw-in { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  .sw-final .sw-ln { white-space: pre; color: #8a8a8a; }
+  .sw-final .sw-ln b { color: #d2f547; font-weight: 600; }
+  .sw-final .sw-big { margin-top: 10px; padding: 10px 12px; background: #d2f547; color: #0a0a0a; font-size: clamp(14px, 2.4vw, 22px); font-weight: 700; letter-spacing: .06em; white-space: nowrap; transform-origin: left; transform: scaleX(0); transition: transform .35s cubic-bezier(.2,.9,.2,1); }
+  .sw-final .sw-big.sw-in { transform: scaleX(1); }
+  .sw-flash { position: absolute; inset: 0; background: #d2f547; opacity: 0; transition: opacity .5s; }
   .sw-cursor svg { position: absolute; display: none; overflow: visible; }
   .sw-cursor[data-mode=arrow] .sw-i-arrow, .sw-cursor[data-mode=cross] .sw-i-cross, .sw-cursor[data-mode=text] .sw-i-text, .sw-cursor[data-mode=pen] .sw-i-pen { display: block; }
   .sw-i-arrow { left: 0; top: 0; } .sw-i-cross { left: -9px; top: -9px; } .sw-i-text { left: -5px; top: -10px; } .sw-i-pen { left: 0; top: -18px; }
@@ -160,32 +170,33 @@
 
   function scan(root) {
     const layers = [];
-    const visit = (node) => {
+    const visit = (node, parentBox) => {
       if (node.hasAttribute('data-swarm-skip')) return;
       const cs = getComputedStyle(node);
       // Things hidden at load, like closed menus, are left for the page to show.
       // The root is exempt because the body is transparent while the script boots.
       if (cs.display === 'none' || cs.visibility === 'hidden') return;
-      if (node !== root && parseFloat(cs.opacity) === 0) return;
+      // Opacity set inline is an entrance animation (framer-motion) that will play, so it is built too.
+      if (node !== root && parseFloat(cs.opacity) === 0 && !(node.style && node.style.opacity !== '')) return;
       const rect = node.getBoundingClientRect();
       if (isMedia(node)) {
-        if (rect.width > 1 && rect.height > 1) layers.push({ type: 'media', el: node, d: 1.25 });
+        if (rect.width > 1 && rect.height > 1) layers.push({ type: 'media', el: node, d: 1.25, after: parentBox || null });
         return;
       }
       let box = null;
       if (node !== root && node !== document.body) {
         const paint = paintOf(node, cs, rect);
         if (paint) {
-          box = { el: node, type: paint.type, edge: paint.edge, d: paint.type === 'rule' ? 0.5 : 0.55 };
+          box = { el: node, type: paint.type, edge: paint.edge, d: paint.type === 'rule' ? 0.5 : 0.55, after: paint.type === 'rule' ? null : (parentBox || null) };
           layers.push(box);
         }
       }
       const leaf = inlineOnly(node);
       const nodes = textNodesOf(node, leaf);
-      if (nodes.length) layers.push({ type: 'text', el: node, after: box, textNodes: nodes, leaf, pre: cs.whiteSpace.startsWith('pre') });
-      if (!leaf) for (const child of node.children) visit(child);
+      if (nodes.length) layers.push({ type: 'text', el: node, after: box || parentBox || null, textNodes: nodes, leaf, pre: cs.whiteSpace.startsWith('pre') });
+      if (!leaf) for (const child of node.children) visit(child, (box && box.type === 'box') ? box : parentBox);
     };
-    visit(root);
+    visit(root, null);
     linkDuplicates(layers);
     return layers;
   }
@@ -238,7 +249,9 @@
         return { n, original, shown, ghost, wrap };
       });
       l.chars = l.parts.reduce((sum, p) => sum + p.shown.length, 0);
-      l.d = l.dupOf ? 0.85 : clamp(l.chars * 0.014, 0.28, 1.15);
+      const fs = parseFloat(getComputedStyle(l.el).fontSize) || 16;
+      l.big = fs >= 40;
+      l.d = l.dupOf ? 0.85 : clamp(l.chars * 0.014 * Math.max(1, fs / 14), 0.28, 2.6);
       l.typed = 0;
       l.range = document.createRange();
       l.range.selectNodeContents(l.el);
@@ -259,6 +272,7 @@
 
   function commit(l) {
     if (l.committed) return;
+    if (l.type === 'frame') { l.committed = true; return; }
     l.committed = true;
     if (l.type === 'media') {
       l.el.classList.remove('sw-hide');
@@ -286,6 +300,16 @@
     let frameCandidates = null;
     const layers = scan(document.body);
     layers.forEach(prepare);
+    // Blueprint pass: every sizeable block is first sketched as a dashed wireframe.
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const l = layers[i];
+      if (l.type === 'rule' || l.dupOf || (l.type === 'text' && !l.big && l.chars < 60)) continue;
+      const r = l.type === 'text' && l.leaf ? l.range.getBoundingClientRect() : l.el.getBoundingClientRect();
+      if (r.width < 40 || r.height < 14) continue;
+      const f = { type: 'frame', el: l.el, target: l, after: l.after || null, d: 0.32 + Math.min(0.4, (r.width + r.height) / 3000) };
+      l.after = f;
+      layers.splice(i, 0, f);
+    }
     // Slower, more readable build: stretch every layer's work time.
     layers.forEach((l) => { l.d *= opt.pace || 1; });
 
@@ -420,9 +444,10 @@
     /* ---------- Assigning work ---------- */
 
     function rectOf(l) {
+      if (l.type === 'frame') return rectOf(l.target);
       return l.type === 'text' && l.leaf ? l.range.getBoundingClientRect() : l.el.getBoundingClientRect();
     }
-    const inView = (r) => r.bottom > 0 && r.top < innerHeight;
+    const inView = (r) => r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
     const ready = (l) => (!l.after || l.after.state === 'done') && (!l.dupOf || l.dupOf.state === 'done');
 
     // Layers that can be worked on now. Measured at most once per frame, because
@@ -433,7 +458,7 @@
         for (const l of pending.slice()) {
           // The page may have removed or hidden this since the scan. Don't wait for it.
           const r = l.el.isConnected ? rectOf(l) : null;
-          if (!r || (r.width === 0 && r.height === 0) || r.right <= 0 || r.left >= innerWidth) {
+          if (!r || (r.width === 0 && r.height === 0)) {
             pending.splice(pending.indexOf(l), 1);
             commit(l);
             l.state = 'done';
@@ -450,6 +475,7 @@
     function pick(agent) {
       const options = candidates();
       if (!options.length) return null;
+      if (!options.sorted) { options.sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left); options.sorted = true; }
       let best = 0;
       let bestDist = Infinity;
       for (let i = 0; i < Math.min(5, options.length); i++) {
@@ -469,6 +495,13 @@
       agent.node.dataset.mode = l.type === 'rule' ? 'pen' : l.type === 'text' ? (l.dupOf ? 'arrow' : 'text') : 'cross';
       setTag(agent, l.type === 'rule' ? 'draw' : l.type === 'text' ? (l.dupOf ? 'copy' : 'type') : l.type === 'media' ? 'img' : 'fill');
       const r = l.rect;
+      if (l.type === 'frame') {
+        agent.node.dataset.mode = 'cross';
+        setTag(agent, 'sketch');
+        l.fill = el('sw-frame sw-abs', layer);
+        l.fill.dataset.k = (l.target.el.tagName || '').toLowerCase();
+        return;
+      }
       if (l.type === 'box' || l.type === 'media') {
         l.fill = el('sw-fill sw-abs', layer);
         makeSelection(l);
@@ -489,6 +522,8 @@
     }
 
     function finish(agent, l) {
+      if (l.type === 'frame') { l.target.wire = l.fill; l.fill = null; }
+      if (l.wire) { fadeOut(l.wire, 320); l.wire = null; }
       commit(l);
       l.state = 'done';
       done++;
@@ -499,7 +534,7 @@
       agent.node.dataset.mode = 'arrow';
       agent.wanderAt = 0;
       setTag(agent, '');
-      doneList.push(l);
+      if (l.type !== 'frame') doneList.push(l);
     }
 
     /* ---------- Idle agents: review finished work, pair up, or step aside ---------- */
@@ -526,7 +561,7 @@
     function findReview() {
       for (let i = doneList.length - 1, n = 0; i >= 0 && n < 40; i--, n++) {
         const l = doneList[i];
-        if (l.reviewed || l.dupOf || !l.el.isConnected) continue;
+        if (l.reviewed || l.dupOf || l.type === 'frame' || !l.el.isConnected) continue;
         const r = rectOf(l);
         if (r.width < 24 || r.height < 10 || !inView(r) || r.top < 0 || r.bottom > innerHeight) continue;
         return l;
@@ -565,13 +600,13 @@
         setTag(agent, 'review');
         return;
       }
-      const busy = agents.filter((b) => b !== agent && b.task && b.working && !agents.some((c) => c.pair === b));
+      const busy = agents.filter((b) => b !== agent && b.task && b.working && agents.filter((c) => c.pair === b).length < (b.task.big ? 3 : 1));
       if (busy.length) {
         const b = busy[Math.floor(Math.random() * busy.length)];
         if (agent.parked) show(agent, true);
         agent.pair = b;
-        agent.pairDx = rand(-46, -22);
-        agent.pairDy = rand(18, 34);
+        agent.pairDx = b.task.big ? rand(-120, 60) : rand(-46, -22);
+        agent.pairDy = b.task.big ? rand(-60, 70) : rand(18, 34);
         setTag(agent, 'assist ' + b.id);
         agent.wanderAt = now + rand(900, 1500) / speed;
         return;
@@ -628,6 +663,14 @@
         return;
       }
       const p = l.p;
+      if (l.type === 'frame') {
+        const q = ease(p);
+        const w = r.width * q, h = r.height * Math.min(1, q * 1.6);
+        place(l.fill, r.left - 2, r.top - 2, w + 4, h + 4);
+        agent.tx = r.left + w;
+        agent.ty = r.top + h;
+        return;
+      }
       if (l.type === 'text') {
         if (l.dupOf) {
           const f = l.fromRect;
@@ -715,41 +758,42 @@
       if (!tour || now - lastUser < 1500) return;
       if (camTarget === null) {
         const busy = agents.filter((a) => a.task).length;
+        const stuck = now - lastProgress > 1800 && !busy;
         let wantsScroll = false;
-        let next = null;
-        if (pending.length && busy <= Math.max(2, activeCount * 0.15) && !candidates().length) {
-          // Nearest unbuilt layer off screen, preferring what is below.
-          let best = Infinity;
-          for (const l of pending) {
-            const r = rectOf(l);
-            if (inView(r)) continue;
-            const d = r.top >= innerHeight ? r.top - innerHeight : 1e6 - r.bottom;
-            if (d < best) { best = d; next = l; }
-          }
-          // Everything left is on screen but waiting on something: unblock it.
-          if (!next && !busy) {
-            const l = pending.shift();
-            commit(l); l.state = 'done'; done++; lastProgress = now;
-          }
-          wantsScroll = !!next;
-        }
+        if ((pending.length || scrollY < document.documentElement.scrollHeight - innerHeight - 2) && (stuck || (busy <= Math.max(2, activeCount * 0.15) && !candidates().length && !pending.some((l) => { const r = rectOf(l); return r.width && r.top < innerHeight * 0.9 && r.bottom > 0 && r.right > 0 && r.left < innerWidth; })))) wantsScroll = true;
         if (!wantsScroll) {
           calmSince = 0;
         } else {
           // Hold for a moment so each finished screen can be seen before moving on.
           if (!calmSince) calmSince = now;
-          if (now - calmSince > 1100 / (speed * sizeRate)) {
-            const max = document.documentElement.scrollHeight - innerHeight;
-            camTarget = clamp(scrollY + rectOf(next).top - innerHeight * 0.16, 0, max);
-            camY = scrollY;
+          if (now - calmSince > (pending.length ? 1000 : 200) / (speed * sizeRate)) {
             calmSince = 0;
+            const max = document.documentElement.scrollHeight - innerHeight;
+            // Layers left above the viewport will never be watched: finish them.
+            let below = Infinity;
+            for (const l of pending.slice()) {
+              const r = rectOf(l);
+              if (r.bottom <= 0) { pending.splice(pending.indexOf(l), 1); commit(l); if (l.wire) { fadeOut(l.wire, 320); l.wire = null; } l.state = 'done'; done++; continue; }
+              if (r.top >= innerHeight * 0.6 && r.top < below) below = r.top;
+            }
+            lastProgress = now;
+            if (scrollY >= max - 2) {
+              // Bottom of the page: whatever is left (off to the side) is finished directly.
+              for (const l of pending.splice(0)) { commit(l); l.state = 'done'; done++; }
+            } else {
+              // Step down to the next unbuilt block, but never jump more than most of a screen,
+              // so tall scroll-driven sections (sticky, horizontal tracks) are walked through.
+              const step = below === Infinity ? innerHeight * (pending.length ? 0.6 : 1.1) : clamp(below - innerHeight * 0.16, innerHeight * 0.25, innerHeight * 0.85);
+              camTarget = clamp(scrollY + step, 0, max);
+              camY = scrollY;
+            }
           }
         }
       }
       if (camTarget !== null) {
         camY += (camTarget - camY) * (1 - Math.exp(-3.4 * dt));
         scrollTo({ top: camY, behavior: 'instant' });
-        if (Math.abs(camTarget - camY) < 2) camTarget = null;
+        if (Math.abs(camTarget - camY) < 2) { scrollTo({ top: camTarget, behavior: 'instant' }); camTarget = null; }
       }
     }
 
@@ -828,42 +872,71 @@
       camera(real * Math.sqrt(speed * sizeRate), now);
       updateBar();
 
-      // If a layer can never come into view, don't hang: finish it directly.
-      if (pending.length && tour && now - lastUser > 1500 && now - lastProgress > 2500 && !agents.some((a) => a.task)) {
-        const l = pending.shift();
-        commit(l);
-        l.state = 'done';
-        done++;
-        lastProgress = now;
-      }
-
-      if (!ending && done === total) beginEnding(now);
-      if (ending) {
-        const moved = opt.returnToTop && !userScrolled && now - lastUser > 1500;
-        if (moved && camY > 0) {
-          camY *= Math.exp(-3.6 * real);
-          if (camY < 6) camY = 0;
-          scrollTo({ top: camY, behavior: 'instant' });
-        }
-        if (now - endStart > 1000 && (!moved || camY === 0)) { stop(); return; }
-      }
+      if (!ending && done === total && (!tour || userScrolled || scrollY >= document.documentElement.scrollHeight - innerHeight - 2)) beginEnding(now);
+      if (ending) { if (finale(now)) return; }
       raf = requestAnimationFrame(frame);
     }
 
+    /* ---------- Finale: jump to the top and "publish" the page ---------- */
+    let fin = null;
     function beginEnding(now) {
       ending = true;
       endStart = now;
-      camY = scrollY;
       for (const a of agents) {
         endReview(a);
         a.pair = null;
-        setTag(a, '');
         a.wanderAt = Infinity;
-        a.tx = a.x < innerWidth / 2 ? -40 : innerWidth + 40;
-        a.ty = a.y + rand(-160, 160);
+        a.node.dataset.mode = 'arrow';
+        a.parked = false;
+        a.node.style.opacity = 1;
+        if (!a.on) { a.on = true; a.x = a.mx = rand(0, innerWidth); a.y = a.my = innerHeight + 40; }
       }
-      layer.classList.add('sw-out');
       bar.classList.add('sw-out');
+      if (opt.returnToTop && !userScrolled) scrollTo({ top: 0, behavior: 'instant' });
+      const box = el('sw-final', layer);
+      const lines = [
+        ['> npm run build', ' <b>✓ ' + total + ' layers</b>'],
+        ['> optimizing assets', ' <b>✓</b>'],
+        ['> deploying to production', ' <b>✓ live</b>'],
+      ].map(([a, b]) => { const n = el('sw-ln', box); n.full = a; n.tail = b; return n; });
+      const big = el('sw-big', box);
+      big.textContent = 'PAGE PUBLISHED SUCCESSFULLY ✓';
+      const flash = el('sw-flash', layer);
+      fin = { box, lines, big, flash, t0: now, phase: 0 };
+      requestAnimationFrame(() => box.classList.add('sw-in'));
+    }
+
+    // Returns true once the animation has stopped.
+    function finale(now) {
+      const t = now - fin.t0;
+      const rb = fin.box.getBoundingClientRect();
+      const cx = rb.left + rb.width / 2, cy = rb.top + rb.height / 2;
+      // Type the deploy log line by line.
+      fin.lines.forEach((n, i) => {
+        const start = 150 + i * 380;
+        const k = clamp(Math.floor((t - start) / 18), 0, n.full.length);
+        const html = n.full.slice(0, k).replace(/</g, '&lt;') + (k === n.full.length && t > start + n.full.length * 18 + 120 ? n.tail : '');
+        if (n.last !== html) { n.last = html; n.innerHTML = html || '&nbsp;'; }
+      });
+      if (t > 1400 && fin.phase === 0) { fin.phase = 1; fin.big.classList.add('sw-in'); fin.flash.style.opacity = '.18'; setTimeout(() => { fin.flash.style.opacity = '0'; }, 160); }
+      // Cursors gather around the card, then burst outward.
+      const n = agents.length;
+      agents.forEach((a, i) => {
+        const ang = (i / n) * Math.PI * 2 + t / 2200;
+        if (t < 2500) {
+          const rx = rb.width / 2 + 40 + (i % 3) * 14, ry = rb.height / 2 + 34 + (i % 3) * 10;
+          a.tx = cx + Math.cos(ang) * rx;
+          a.ty = cy + Math.sin(ang) * ry;
+          setTag(a, t > 1400 && i % 3 === 0 ? (i % 2 ? 'ship it' : 'gg') : '');
+        } else {
+          setTag(a, '');
+          a.tx = cx + Math.cos(ang) * innerWidth;
+          a.ty = cy + Math.sin(ang) * innerHeight;
+        }
+      });
+      if (t > 2600 && fin.phase === 1) { fin.phase = 2; layer.classList.add('sw-out'); }
+      if (t > 3100) { stop(); return true; }
+      return false;
     }
 
     function stop() {
