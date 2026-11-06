@@ -16,10 +16,21 @@ declare global {
   }
 }
 
+const unboot = () => document.documentElement.classList.remove('sw-boot')
+
 const startSwarm = () => {
-  const go = () => window.Swarm?.run({ agents: 18, mobileAgents: 8, speed: 1.2, tour: true, returnToTop: true, targetSeconds: 12 })
-  const ready = document.fonts ? document.fonts.ready : Promise.resolve()
-  ready.then(() => requestAnimationFrame(() => setTimeout(go, 400)))
+  const go = () => {
+    try {
+      if (window.Swarm && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        window.Swarm.run({ agents: 18, mobileAgents: 8, speed: 1.2, tour: true, returnToTop: true, targetSeconds: 12 })
+      }
+    } finally {
+      unboot()
+    }
+  }
+  const fonts = document.fonts ? document.fonts.ready : Promise.resolve()
+  Promise.race([fonts, new Promise((r) => setTimeout(r, 800))]).then(() => requestAnimationFrame(() => requestAnimationFrame(go)))
 }
 
 if (document.readyState === 'complete') startSwarm()
