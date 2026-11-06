@@ -27,7 +27,7 @@
     storageKey: 'swarm-played',
   };
 
-  const COLORS = ['#ffe27a', '#8ff0b0', '#ffb37a', '#d9b8ff', '#7fe3e0', '#ff9ab0', '#a9c6ff', '#f2f2f2'];
+  const COLORS = ['#d2f547', '#ededed', '#e03131', '#d2f547', '#ededed', '#8a8a8a', '#d2f547', '#e03131'];
   const SPEEDS = [1, 2, 4];
   const MEDIA = new Set(['IMG', 'SVG', 'CANVAS', 'VIDEO', 'PICTURE', 'IFRAME']);
 
@@ -37,39 +37,45 @@
   .sw-hide { opacity: 0 !important; }
   .sw-ghost { opacity: 0; }
   @media print { .sw-hide, .sw-ghost { opacity: 1 !important; } .sw-layer { display: none !important; } }
-  .sw-layer { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; overflow: hidden; transition: opacity .35s; font: 500 10px/1 ui-monospace, Menlo, Consolas, monospace; }
+  .sw-layer { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; overflow: hidden; transition: opacity .35s; font: 600 10px/1 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; text-transform: uppercase; }
   .sw-layer * { box-sizing: border-box; }
   .sw-layer.sw-out { opacity: 0; }
   .sw-abs { position: absolute; left: 0; top: 0; will-change: transform; }
-  .sw-sel { border: 1.5px solid #2f7bff; transition: opacity .2s; }
-  .sw-sel.sw-red { border-color: #ff3b47; }
+  .sw-sel { border: 1.5px solid #d2f547; transition: opacity .2s; }
+  .sw-sel.sw-red { border-color: #e03131; }
   .sw-sel.sw-out, .sw-fill.sw-out, .sw-line.sw-out, .sw-guide.sw-out, .sw-clone.sw-out { opacity: 0; }
-  .sw-handle { position: absolute; width: 7px; height: 7px; background: #fff; border: 1.5px solid #2f7bff; border-radius: 1px; }
-  .sw-red .sw-handle { border-color: #ff3b47; }
+  .sw-handle { position: absolute; width: 7px; height: 7px; background: #0a0a0a; border: 1.5px solid #d2f547; border-radius: 0; }
+  .sw-red .sw-handle { border-color: #e03131; }
   .sw-h0 { left: -4px; top: -4px; } .sw-h1 { right: -4px; top: -4px; } .sw-h2 { left: -4px; bottom: -4px; } .sw-h3 { right: -4px; bottom: -4px; }
-  .sw-badge { position: absolute; left: 50%; top: calc(100% + 5px); transform: translateX(-50%); padding: 3px 5px; border-radius: 2px; background: #2f7bff; color: #fff; white-space: nowrap; }
-  .sw-red .sw-badge { background: #ff3b47; }
-  .sw-fill { background: rgba(142, 158, 180, .5); transition: opacity .18s; }
-  .sw-line { background: #2f7bff; height: 2px; width: 2px; transition: opacity .25s; box-shadow: 0 0 6px rgba(47,123,255,.8); }
-  .sw-guide { background: #ff3b47; transition: opacity .25s; }
+  .sw-badge { position: absolute; left: 50%; top: calc(100% + 5px); transform: translateX(-50%); padding: 3px 5px; border-radius: 0; background: #d2f547; color: #0a0a0a; white-space: nowrap; }
+  .sw-red .sw-badge { background: #e03131; color: #ededed; }
+  .sw-fill { background: repeating-linear-gradient(-45deg, rgba(210,245,71,.22) 0 6px, rgba(210,245,71,.06) 6px 12px); outline: 1px dashed rgba(210,245,71,.55); transition: opacity .18s; }
+  .sw-line { background: #d2f547; height: 2px; width: 2px; transition: opacity .25s; }
+  .sw-guide { background: #e03131; transition: opacity .25s; }
   .sw-clone { white-space: nowrap; transition: opacity .12s; }
-  .sw-cursor { width: 0; height: 0; transition: opacity .3s; filter: drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+  .sw-cursor { width: 0; height: 0; transition: opacity .3s; filter: drop-shadow(2px 2px 0 #000); }
+  .sw-tag { position: absolute; left: 13px; top: 19px; padding: 2px 4px; background: var(--c); color: #0a0a0a; font-size: 9px; white-space: nowrap; }
+  .sw-tag:empty { display: none; }
+  .sw-qa { border: 1.5px dashed #ededed; transition: opacity .25s; }
+  .sw-qa .sw-badge { background: #ededed; color: #0a0a0a; left: 0; transform: none; top: -19px; }
+  .sw-qa.sw-ok { border-color: #d2f547; } .sw-qa.sw-ok .sw-badge { background: #d2f547; }
+  .sw-qa.sw-out { opacity: 0; }
   .sw-cursor svg { position: absolute; display: none; overflow: visible; }
   .sw-cursor[data-mode=arrow] .sw-i-arrow, .sw-cursor[data-mode=cross] .sw-i-cross, .sw-cursor[data-mode=text] .sw-i-text, .sw-cursor[data-mode=pen] .sw-i-pen { display: block; }
   .sw-i-arrow { left: 0; top: 0; } .sw-i-cross { left: -9px; top: -9px; } .sw-i-text { left: -5px; top: -10px; } .sw-i-pen { left: 0; top: -18px; }
-  .sw-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2147483001; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 7px 8px 7px 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(20,21,26,.92); color: #e9e9ec; box-shadow: 0 8px 30px rgba(0,0,0,.4); font: 500 12px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; white-space: nowrap; transition: opacity .3s; }
+  .sw-bar { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 2147483001; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 7px 8px 7px 12px; border: 1px solid #262626; border-radius: 0; background: #0a0a0a; color: #ededed; box-shadow: 4px 4px 0 #d2f547; font: 600 11px/1 'JetBrains Mono', ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; transition: opacity .3s; }
   .sw-bar.sw-out { opacity: 0; pointer-events: none; }
   .sw-dots { display: flex; }
-  .sw-dots i { width: 11px; height: 11px; margin-left: -3px; border-radius: 50%; border: 1.5px solid #14151a; }
+  .sw-dots i { width: 9px; height: 9px; margin-left: 2px; border-radius: 0; }
   .sw-dots i:first-child { margin-left: 0; }
   .sw-count { font-variant-numeric: tabular-nums; }
   .sw-count b { font-weight: 600; }
-  .sw-count span { color: #a1a3ab; }
-  .sw-track { width: 64px; height: 2px; border-radius: 2px; background: rgba(255,255,255,.18); overflow: hidden; }
-  .sw-track i { display: block; height: 100%; width: 100%; background: #5b93ff; transform-origin: left; transform: scaleX(0); }
-  .sw-btn { all: unset; box-sizing: border-box; min-width: 28px; height: 26px; padding: 0 8px; border-radius: 7px; background: rgba(255,255,255,.1); color: inherit; font: inherit; text-align: center; line-height: 26px; cursor: pointer; }
-  .sw-btn:hover { background: rgba(255,255,255,.2); }
-  .sw-btn:focus-visible { outline: 2px solid #5b93ff; outline-offset: 1px; }
+  .sw-count span { color: #737373; }
+  .sw-track { width: 64px; height: 4px; border-radius: 0; background: #262626; overflow: hidden; }
+  .sw-track i { display: block; height: 100%; width: 100%; background: #d2f547; transform-origin: left; transform: scaleX(0); }
+  .sw-btn { all: unset; box-sizing: border-box; min-width: 28px; height: 26px; padding: 0 8px; border-radius: 0; background: #1c1c1c; color: inherit; font: inherit; text-align: center; line-height: 26px; cursor: pointer; }
+  .sw-btn:hover { background: #d2f547; color: #0a0a0a; }
+  .sw-btn:focus-visible { outline: 2px solid #d2f547; outline-offset: 1px; }
   .sw-btn[aria-pressed=false] { color: #8d8f98; background: transparent; }
   .sw-replay { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2147483001; height: 34px; padding: 0 14px; line-height: 34px; background: rgba(20,21,26,.92); border: 1px solid rgba(255,255,255,.14); color: #e9e9ec; font: 500 12px/34px ui-sans-serif, system-ui, sans-serif; }
   @media (max-width: 560px) { .sw-track, .sw-dots { display: none; } .sw-bar { gap: 7px; } }
@@ -78,10 +84,10 @@
   const icon = (name, w, h, body) =>
     `<svg class="sw-i-${name}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${body}</svg>`;
   const cursorMarkup = (c) =>
-    icon('arrow', 18, 20, `<path d="M1 1l5.2 16 2.9-6.3L16 8z" fill="${c}" stroke="#14151a" stroke-width="1.2" stroke-linejoin="round"/>`) +
-    icon('cross', 18, 18, `<path d="M9 1v16M1 9h16" stroke="#14151a" stroke-width="4.5" stroke-linecap="round"/><path d="M9 1.5v15M1.5 9h15" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`) +
-    icon('text', 10, 20, `<path d="M2 1.5h6M5 1.5v17M2 18.5h6" stroke="#14151a" stroke-width="3.6" stroke-linecap="round"/><path d="M2 1.5h6M5 1.5v17M2 18.5h6" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/>`) +
-    icon('pen', 18, 18, `<path d="M1 17l1.6-5L13 1.6l3.4 3.4L6 15.4z" fill="${c}" stroke="#14151a" stroke-width="1.2" stroke-linejoin="round"/>`);
+    icon('arrow', 16, 20, `<path d="M1 1v16l4.5-4.2 3 6.2 2.6-1.2-3-6.1H14z" fill="${c}" stroke="#0a0a0a" stroke-width="1.4" stroke-linejoin="miter"/>`) +
+    icon('cross', 18, 18, `<path d="M9 1v16M1 9h16" stroke="#0a0a0a" stroke-width="4.5" stroke-linecap="square"/><path d="M9 1.5v15M1.5 9h15" stroke="${c}" stroke-width="2.2" stroke-linecap="square"/>`) +
+    icon('text', 10, 20, `<path d="M2 1.5h6M5 1.5v17M2 18.5h6" stroke="#0a0a0a" stroke-width="3.6" stroke-linecap="square"/><path d="M2 1.5h6M5 1.5v17M2 18.5h6" stroke="${c}" stroke-width="1.5" stroke-linecap="square"/>`) +
+    icon('pen', 18, 18, `<path d="M1 17l1.6-5L13 1.6l3.4 3.4L6 15.4z" fill="${c}" stroke="#0a0a0a" stroke-width="1.4" stroke-linejoin="miter"/>`);
 
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const ease = (t) => t * t * (3 - 2 * t);
@@ -312,12 +318,13 @@
     const agents = Array.from({ length: maxAgents }, (_, i) => {
       const node = el('sw-cursor sw-abs', layer);
       const color = COLORS[i % COLORS.length];
-      node.innerHTML = cursorMarkup(color);
+      node.innerHTML = cursorMarkup(color) + '<span class="sw-tag"></span>';
+      node.style.setProperty('--c', color);
       node.dataset.mode = 'arrow';
       node.style.opacity = 0;
       const x = rand(0, innerWidth);
       const y = rand(0, innerHeight);
-      return { node, color, x, y, mx: x, my: y, tx: x, ty: y, on: false, task: null, wanderAt: 0, travel: 0 };
+      return { node, tag: node.lastChild, id: 'A' + String(i + 1).padStart(2, '0'), color, x, y, mx: x, my: y, tx: x, ty: y, on: false, task: null, wanderAt: 0, travel: 0, review: null, pair: null, parked: false };
     });
     let activeCount = 0;
 
@@ -458,6 +465,7 @@
       l.p = 0;
       agent.working = true;
       agent.node.dataset.mode = l.type === 'rule' ? 'pen' : l.type === 'text' ? (l.dupOf ? 'arrow' : 'text') : 'cross';
+      setTag(agent, l.type === 'rule' ? 'draw' : l.type === 'text' ? (l.dupOf ? 'copy' : 'type') : l.type === 'media' ? 'img' : 'fill');
       const r = l.rect;
       if (l.type === 'box' || l.type === 'media') {
         l.fill = el('sw-fill sw-abs', layer);
@@ -488,6 +496,90 @@
       agent.working = false;
       agent.node.dataset.mode = 'arrow';
       agent.wanderAt = 0;
+      setTag(agent, '');
+      doneList.push(l);
+    }
+
+    /* ---------- Idle agents: review finished work, pair up, or step aside ---------- */
+
+    const doneList = [];
+    function setTag(agent, word) {
+      const t = word ? agent.id + ' ' + word : '';
+      if (agent.tagText !== t) { agent.tagText = t; agent.tag.textContent = t; }
+    }
+    function show(agent, on) {
+      agent.parked = !on;
+      agent.node.style.opacity = on ? 1 : 0;
+    }
+    function endReview(agent) {
+      if (!agent.review) return;
+      fadeOut(agent.review.box, 260);
+      agent.review = null;
+    }
+    function freeIdle(agent) {
+      endReview(agent);
+      agent.pair = null;
+      if (agent.parked) show(agent, true);
+    }
+    function findReview() {
+      for (let i = doneList.length - 1, n = 0; i >= 0 && n < 40; i--, n++) {
+        const l = doneList[i];
+        if (l.reviewed || l.dupOf || !l.el.isConnected) continue;
+        const r = rectOf(l);
+        if (r.width < 24 || r.height < 10 || !inView(r) || r.top < 0 || r.bottom > innerHeight) continue;
+        return l;
+      }
+      return null;
+    }
+    function idle(agent, now) {
+      if (agent.review) {
+        const rv = agent.review;
+        const r = rectOf(rv.l);
+        place(rv.box, r.left - 3, r.top - 3, r.width + 6, r.height + 6);
+        const q = clamp((now - rv.start) / (rv.until - rv.start), 0, 1);
+        agent.tx = r.left + r.width * (0.1 + 0.8 * q);
+        agent.ty = r.top + r.height * (q < 0.5 ? 0.3 : 0.75);
+        if (q > 0.7 && !rv.ok) { rv.ok = true; rv.box.classList.add('sw-ok'); rv.badge.textContent = 'QA ✓ ok'; }
+        if (q >= 1 || !inView(r)) { endReview(agent); agent.wanderAt = 0; }
+        return;
+      }
+      if (agent.pair) {
+        const b = agent.pair;
+        if (!b.task || !b.working) { agent.pair = null; agent.wanderAt = 0; }
+        else { agent.tx = b.x + agent.pairDx; agent.ty = b.y + agent.pairDy; if (now < agent.wanderAt) return; }
+      }
+      if (now < agent.wanderAt) return;
+      agent.wanderAt = now + rand(350, 700) / speed;
+      const l = findReview();
+      if (l) {
+        l.reviewed = true;
+        if (agent.parked) show(agent, true);
+        const box = el('sw-qa sw-abs', layer);
+        const badge = el('sw-badge', box);
+        badge.textContent = 'QA …';
+        const dur = rand(700, 1100) / (speed * Math.min(sizeRate, 2));
+        agent.review = { l, box, badge, start: now, until: now + dur, ok: false };
+        agent.node.dataset.mode = 'arrow';
+        setTag(agent, 'review');
+        return;
+      }
+      const busy = agents.filter((b) => b !== agent && b.task && b.working && !agents.some((c) => c.pair === b));
+      if (busy.length) {
+        const b = busy[Math.floor(Math.random() * busy.length)];
+        if (agent.parked) show(agent, true);
+        agent.pair = b;
+        agent.pairDx = rand(-46, -22);
+        agent.pairDy = rand(18, 34);
+        setTag(agent, 'assist ' + b.id);
+        agent.wanderAt = now + rand(900, 1500) / speed;
+        return;
+      }
+      // Nothing useful to do on this screen: step out of frame instead of clicking at nothing.
+      setTag(agent, '');
+      agent.pair = null;
+      agent.tx = agent.x < innerWidth / 2 ? -40 : innerWidth + 40;
+      agent.ty = clamp(agent.y, 40, innerHeight - 40);
+      if (!agent.parked) show(agent, false);
     }
 
     /* ---------- Per-frame stages ---------- */
@@ -687,6 +779,8 @@
         if (!a.task && pending.length && !ending) {
           const l = pick(a);
           if (l) {
+            freeIdle(a);
+            setTag(a, 'go');
             l.state = 'assigned';
             l.rect = rectOf(l);
             a.task = l;
@@ -711,11 +805,7 @@
 
       for (const a of agents) {
         if (!a.on) continue;
-        if (!a.task && now > a.wanderAt) {
-          a.tx = rand(innerWidth * 0.05, innerWidth * 0.95);
-          a.ty = rand(innerHeight * 0.08, innerHeight * 0.88);
-          a.wanderAt = now + rand(500, 1500) / speed;
-        }
+        if (!a.task && !ending) idle(a, now);
         moveCursor(a, dt);
       }
 
@@ -749,6 +839,9 @@
       endStart = now;
       camY = scrollY;
       for (const a of agents) {
+        endReview(a);
+        a.pair = null;
+        setTag(a, '');
         a.wanderAt = Infinity;
         a.tx = a.x < innerWidth / 2 ? -40 : innerWidth + 40;
         a.ty = a.y + rand(-160, 160);
