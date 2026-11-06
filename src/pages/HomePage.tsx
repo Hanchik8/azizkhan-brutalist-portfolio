@@ -12,7 +12,7 @@ const Footer = lazy(() => import('../components/Footer'))
 
 function SectionFallback() {
   return (
-    <div className="py-24 flex items-center justify-center">
+    <div data-swarm-fallback className="py-24 flex items-center justify-center">
       <div className="animate-pulse font-mono text-xs text-muted-foreground tracking-widest uppercase">
         Loading...
       </div>

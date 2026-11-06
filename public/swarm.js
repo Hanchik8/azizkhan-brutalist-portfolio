@@ -28,7 +28,7 @@
   };
 
   const COLORS = ['#d2f547', '#ededed', '#e03131', '#d2f547', '#ededed', '#8a8a8a', '#d2f547', '#e03131'];
-  const SPEEDS = [1, 2, 4];
+  const SPEEDS = [1.25, 2.5, 5];
   const MEDIA = new Set(['IMG', 'SVG', 'CANVAS', 'VIDEO', 'PICTURE', 'IFRAME']);
 
   const CSS = `
@@ -168,10 +168,13 @@
     return out;
   }
 
-  function scan(root) {
+  /* known: elements and text nodes already taken by earlier layers. A rescan with it
+     returns only what the page added since (lazy sections, menus, live log lines). */
+  function scan(root, known) {
     const layers = [];
     const visit = (node, parentBox) => {
       if (node.hasAttribute('data-swarm-skip')) return;
+      if (/^SW-/.test(node.tagName) || (node.classList && (node.classList.contains('sw-layer') || node.classList.contains('sw-bar')))) return;
       const cs = getComputedStyle(node);
       // Things hidden at load, like closed menus, are left for the page to show.
       // The root is exempt because the body is transparent while the script boots.
@@ -180,19 +183,20 @@
       if (node !== root && parseFloat(cs.opacity) === 0 && !(node.style && node.style.opacity !== '')) return;
       const rect = node.getBoundingClientRect();
       if (isMedia(node)) {
-        if (rect.width > 1 && rect.height > 1) layers.push({ type: 'media', el: node, d: 1.25, after: parentBox || null });
+        if (rect.width > 1 && rect.height > 1 && !(known && known.has(node))) layers.push({ type: 'media', el: node, d: 1.25, after: parentBox || null });
         return;
       }
       let box = null;
       if (node !== root && node !== document.body) {
-        const paint = paintOf(node, cs, rect);
+        const paint = known && known.has(node) ? null : paintOf(node, cs, rect);
         if (paint) {
           box = { el: node, type: paint.type, edge: paint.edge, d: paint.type === 'rule' ? 0.5 : 0.55, after: paint.type === 'rule' ? null : (parentBox || null) };
           layers.push(box);
         }
       }
       const leaf = inlineOnly(node);
-      const nodes = textNodesOf(node, leaf);
+      let nodes = textNodesOf(node, leaf);
+      if (known) nodes = nodes.filter((n) => !known.has(n) && !(n.parentElement && n.parentElement.closest('sw-ghost')));
       if (nodes.length) layers.push({ type: 'text', el: node, after: box || parentBox || null, textNodes: nodes, leaf, pre: cs.whiteSpace.startsWith('pre') });
       if (!leaf) for (const child of node.children) visit(child, (box && box.type === 'box') ? box : parentBox);
     };
@@ -228,6 +232,7 @@
   /* The page can change its own text while it is hidden (counters, live stats).
      Those changes are kept: the layer takes the new text and is shown at once. */
   const watched = new Map();
+  let pageChanged = false;
   let watcher = null;
   function watch(l, p) {
     if (!watcher && window.MutationObserver) {
@@ -235,15 +240,31 @@
         for (const m of records) {
           if (m.type === 'characterData') {
             const hit = watched.get(m.target);
-            if (hit && m.target.data !== hit.p.lastWrite) { hit.p.original = m.target.data; commit(hit.l); }
+            if (hit && m.target.data !== hit.p.lastWrite) retext(hit.l, hit.p, m.target.data);
           } else {
             m.removedNodes.forEach((n) => { const hit = watched.get(n); if (hit) commit(hit.l); });
+            m.addedNodes.forEach((n) => {
+              const e = n.nodeType === 1 ? n : n.parentElement;
+              if (e && !/^SW-/.test(e.tagName) && !e.closest('.sw-layer, .sw-bar, sw-ghost')) pageChanged = true;
+            });
           }
         }
       });
       watcher.observe(document.body, { characterData: true, childList: true, subtree: true });
     }
     watched.set(p.n, { l, p });
+  }
+
+  /* The page wrote new text into a layer that is not built yet (a counter ticking):
+     keep it hidden under the new value so the cursors still type it. */
+  function retext(l, p, data) {
+    if (l.committed) return;
+    p.original = data;
+    p.shown = l.pre ? data : data.replace(/\s+/g, ' ');
+    l.chars = l.parts.reduce((sum, q) => sum + q.shown.length, 0);
+    const count = Math.min(l.typed, l.chars);
+    l.typed = -1;
+    setTyped(l, count);
   }
 
   function prepare(l) {
@@ -325,6 +346,7 @@
     let frameCandidates = null;
     const layers = scan(document.body);
     layers.forEach(prepare);
+    window.__swarmLayers = layers;
     // Blueprint pass: every sizeable block is first sketched as a dashed wireframe.
     for (let i = layers.length - 1; i >= 0; i--) {
       const l = layers[i];
@@ -345,7 +367,27 @@
     const sizeRate = clamp((workSeconds + scrollSeconds) / opt.targetSeconds, 1, 4);
 
     const pending = layers.slice();
-    const total = layers.length;
+    let total = layers.length;
+
+    // The page keeps changing while it is being built: lazy sections mount, the floating
+    // nav appears, live panels add lines. Anything new is hidden and queued for the cursors.
+    const known = new Set();
+    const remember = (l) => {
+      if (l.type === 'text') l.parts.forEach((q) => known.add(q.n));
+      else if (l.type !== 'frame') known.add(l.el);
+    };
+    layers.forEach(remember);
+    let lastAdopt = 0;
+    function adopt(now) {
+      if (!pageChanged && now - lastAdopt < 600) return;
+      pageChanged = false;
+      lastAdopt = now;
+      const fresh = scan(document.body, known);
+      if (!fresh.length) return;
+      fresh.forEach((l) => { prepare(l); l.d *= opt.pace || 1; remember(l); pending.push(l); });
+      total += fresh.length;
+      if (window.__swarmLayers) window.__swarmLayers.push(...fresh);
+    }
     let done = 0;
     let speed = opt.speed;
     let tour = opt.tour;
@@ -852,6 +894,7 @@
       const dt = real * speed * sizeRate;
       elapsed += dt;
       frameCandidates = null;
+      if (!ending) adopt(now);
 
       const want = Math.min(maxAgents, Math.round(8 + elapsed * 8));
       while (activeCount < want) {
